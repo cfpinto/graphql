@@ -118,6 +118,7 @@ class Graph
     public function setDriver(Client $driver): Graph
     {
         $this->driver = $driver;
+        return $this;
     }
 
     /**
