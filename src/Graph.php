@@ -191,7 +191,13 @@ class Graph
      */
     public function __toString(): string
     {
-        return $this->driver->get()->getBody()->getContents();
+        return $this->driver->get($this->getUrl(), [
+            'headers' => [
+                'Content-Type' => 'application/graphql',
+                'X-Shopify-Storefront-Access-Token' => $this->getKey()
+            ],
+            'body' => $this->query()
+        ])->getBody()->getContents();
     }
 
     /**
