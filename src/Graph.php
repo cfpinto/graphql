@@ -11,6 +11,7 @@ namespace GraphQL;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use Psr\Http\Message\StreamInterface;
 
 class Graph
 {
@@ -191,13 +192,7 @@ class Graph
      */
     public function __toString(): string
     {
-        return $this->driver->get($this->getUrl(), [
-            'headers' => [
-                'Content-Type' => 'application/graphql',
-                'X-Shopify-Storefront-Access-Token' => $this->getKey()
-            ],
-            'body' => $this->query()
-        ])->getBody()->getContents();
+        return $this->toRequest()->getContents();
     }
 
     /**
@@ -239,6 +234,28 @@ class Graph
             $ql .= " {$module->getKeyName()} " . $module->toQL();
         }
         return $ql . "} ";
+    }
+
+    /**
+     * @return StreamInterface
+     */
+    public function toRequest(): StreamInterface
+    {
+        return $this->driver->get($this->getUrl(), [
+            'headers' => [
+                'Content-Type' => 'application/graphql',
+                'X-Shopify-Storefront-Access-Token' => $this->getKey()
+            ],
+            'body' => $this->query()
+        ])->getBody();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function toJsonResponse()
+    {
+        return \GuzzleHttp\json_decode($this->toString());
     }
 
     /**
