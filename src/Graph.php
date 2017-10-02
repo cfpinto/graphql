@@ -8,11 +8,6 @@
 
 namespace GraphQL;
 
-
-use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
-use Psr\Http\Message\StreamInterface;
-
 class Graph
 {
 
@@ -29,41 +24,7 @@ class Graph
     /**
      * @var string
      */
-    private $url;
-
-    /**
-     * @var string
-     */
-    private $key;
-
-    /**
-     * @var string
-     */
     private $keyName;
-
-    /**
-     * @var Client
-     */
-    private $driver;
-
-    /**
-     * @return string
-     */
-    public function getKey(): string
-    {
-        return $this->key;
-    }
-
-    /**
-     * @param string $key
-     *
-     * @return Graph
-     */
-    public function setKey(string $key): Graph
-    {
-        $this->key = $key;
-        return $this;
-    }
 
     /**
      * @return string
@@ -85,58 +46,6 @@ class Graph
     }
 
     /**
-     * @return string
-     */
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string $url
-     *
-     * @return $this
-     */
-    public function setUrl(string $url): Graph
-    {
-        $this->url = $url;
-        return $this;
-    }
-
-    /**
-     * @return ClientInterface
-     */
-    public function getDriver(): ClientInterface
-    {
-        return $this->driver;
-    }
-
-    /**
-     * @param Client $driver
-     *
-     * @return Graph
-     */
-    public function setDriver(Client $driver): Graph
-    {
-        $this->driver = $driver;
-        return $this;
-    }
-
-    /**
-     * Graph constructor.
-     *
-     * @param string          $url
-     * @param string          $key
-     * @param ClientInterface $http
-     */
-    public function __construct(string $url, string $key, ClientInterface $http = null)
-    {
-        $this->setKey($key)
-            ->setUrl($url)
-            ->setDriver($http ?? new Client());
-    }
-
-    /**
      * @param $name
      *
      * @return mixed
@@ -145,9 +54,9 @@ class Graph
     {
         $className = __NAMESPACE__ . '\\Entities\\' . ucfirst($name);
         if (class_exists($className)) {
-            $this->modules[$name] = (new $className($this->url, $this->key))->setKeyName($name);
+            $this->modules[$name] = (new $className())->setKeyName($name);
         } else {
-            $this->modules[$name] = (new Graph($this->url, $this->key))->setKeyName($name);
+            $this->modules[$name] = (new Graph())->setKeyName($name);
         }
 
         return $this->modules[$name];
@@ -173,17 +82,21 @@ class Graph
             default :
                 $className = __NAMESPACE__ . '\\Entities\\' . ucfirst($name);
                 $args = " ";
-                foreach ($arguments[0] as $key => $value) {
-                    $args .= "{$key}: {$value} ";
+                if (isset($arguments[0])) {
+                    foreach ($arguments[0] as $key => $value) {
+                        $args .= "{$key}: {$value} ";
+                    }
                 }
                 $keyName = "{$name}({$args})";
                 if (class_exists($className)) {
-                    $this->modules[$keyName] = (new $className($this->url, $this->key))->setKeyName($keyName);
+                    $this->modules[$keyName] = (new $className())->setKeyName($keyName);
                 } else {
-                    $this->modules[$keyName] = (new Graph($this->url, $this->key))->setKeyName($keyName);
+                    $this->modules[$keyName] = (new Graph())->setKeyName($keyName);
                 }
+
                 return $this->modules[$keyName];
         }
+
         throw new Exception("method {$name} not found");
     }
 
@@ -192,7 +105,7 @@ class Graph
      */
     public function __toString(): string
     {
-        return $this->toRequest()->getContents();
+        return $this->query();
     }
 
     /**
@@ -234,28 +147,6 @@ class Graph
             $ql .= " {$module->getKeyName()} " . $module->toQL();
         }
         return $ql . "} ";
-    }
-
-    /**
-     * @return StreamInterface
-     */
-    public function toRequest(): StreamInterface
-    {
-        return $this->driver->get($this->getUrl(), [
-            'headers' => [
-                'Content-Type' => 'application/graphql',
-                'X-Shopify-Storefront-Access-Token' => $this->getKey()
-            ],
-            'body' => $this->query()
-        ])->getBody();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function toJsonResponse()
-    {
-        return \GuzzleHttp\json_decode($this->toString());
     }
 
     /**
