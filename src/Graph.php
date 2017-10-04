@@ -27,6 +27,11 @@ class Graph
     private $keyName;
 
     /**
+     * @var Graph
+     */
+    private $parentNode;
+
+    /**
      * @return string
      */
     public function getKeyName(): string
@@ -80,21 +85,7 @@ class Graph
             case "use":
                 return call_user_func_array([$this, 'get'], $arguments);
             default :
-                $className = __NAMESPACE__ . '\\Entities\\' . ucfirst($name);
-                $args = " ";
-                if (isset($arguments[0])) {
-                    foreach ($arguments[0] as $key => $value) {
-                        $args .= "{$key}: {$value} ";
-                    }
-                }
-                $keyName = "{$name}({$args})";
-                if (class_exists($className)) {
-                    $this->modules[$keyName] = (new $className())->setKeyName($keyName);
-                } else {
-                    $this->modules[$keyName] = (new Graph())->setKeyName($keyName);
-                }
-
-                return $this->modules[$keyName];
+                ;
         }
 
         throw new Exception("method {$name} not found");
@@ -116,6 +107,10 @@ class Graph
         $args = func_get_args();
         $this->properties = array_merge($this->properties, $args);
         return $this;
+    }
+
+    public function prev() {
+        return $this->parentNode;
     }
 
     /**
@@ -164,6 +159,25 @@ class Graph
     {
         $string = "{ {$this->getKeyName()} {$this->toQl()} }";
         return preg_replace('/\s{2,}/', ' ', $string);
+    }
+
+    private function buildNode($name, $arguments)
+    {
+        $className = __NAMESPACE__ . '\\Entities\\' . ucfirst($name);
+        $args = " ";
+        if (isset($arguments[0])) {
+            foreach ($arguments[0] as $key => $value) {
+                $args .= "{$key}: {$value} ";
+            }
+        }
+        $keyName = "{$name}({$args})";
+        if (class_exists($className)) {
+            $this->modules[$keyName] = (new $className())->setKeyName($keyName);
+        } else {
+            $this->modules[$keyName] = (new Graph())->setKeyName($keyName);
+        }
+
+        return $this->modules[$keyName];
     }
 
 }
