@@ -8,7 +8,10 @@
 
 namespace GraphQL;
 
-
+/**
+ * Class Exception
+ * @package GraphQL
+ */
 class Exception extends \Exception
 {
 

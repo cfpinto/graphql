@@ -10,7 +10,7 @@ namespace GraphQL;
 
 class Graph
 {
-
+    const TAB = 2;
     /**
      * @var array
      */
@@ -51,25 +51,54 @@ class Graph
     }
 
     /**
+     * @return Graph
+     */
+    public function getParentNode(): Graph
+    {
+        return $this->parentNode;
+    }
+
+    /**
+     * @param Graph $parentNode
+     *
+     * @return $this
+     */
+    public function setParentNode(Graph $parentNode): Graph
+    {
+        $this->parentNode = $parentNode;
+        return $this;
+    }
+
+    /**
+     * Graph constructor.
+     *
+     * @param $name
+     * @param $properties
+     */
+    public function __construct($name = null, $properties = null)
+    {
+        if ($name) {
+            $this->setKeyName($this->buildKeyName($name, $properties));
+        }
+    }
+
+    /**
      * @param $name
      *
      * @return mixed
      */
     public function __get($name)
     {
-        $className = __NAMESPACE__ . '\\Entities\\' . ucfirst($name);
-        if (class_exists($className)) {
-            $this->modules[$name] = (new $className())->setKeyName($name);
-        } else {
-            $this->modules[$name] = (new Graph())->setKeyName($name);
-        }
-
-        return $this->modules[$name];
+        return $this->buildNode($name);
     }
 
-    public function __set($name, $value)
+    /**
+     * @param       $name
+     * @param Graph $value
+     */
+    public function __set($name, Graph $value)
     {
-        $this->properties[$name] = $value;
+        $this->modules[$name] = $value;
     }
 
     /**
@@ -85,7 +114,7 @@ class Graph
             case "use":
                 return call_user_func_array([$this, 'get'], $arguments);
             default :
-                ;
+                return $this->buildNode($name, $arguments);
         }
 
         throw new Exception("method {$name} not found");
@@ -109,8 +138,33 @@ class Graph
         return $this;
     }
 
-    public function prev() {
-        return $this->parentNode;
+    /**
+     * @param string $object
+     *
+     * @return Graph
+     */
+    public function on(string $object): Graph
+    {
+        $key = "... on {$object}";
+        return ($this->modules[$key] = (new Graph())->setKeyName($key));
+    }
+
+    /**
+     * @return Graph
+     */
+    public function prev(): Graph
+    {
+        return $this->getParentNode();
+    }
+
+    /**
+     * @return Graph
+     */
+    public function clear(): Graph
+    {
+        $this->modules = [];
+        $this->properties = [];
+        return $this;
     }
 
     /**
@@ -130,18 +184,18 @@ class Graph
     /**
      * @return string
      */
-    public function toQL(): string
+    public function toQL($index): string
     {
-        $ql = "{";
+        $ql = "{\n";
         foreach ($this->properties as $property) {
-            $ql .= " {$property} ";
+            $ql .= str_repeat(' ', $index * self::TAB) . "{$property}\n";
         }
 
         /** @var Graph $module */
         foreach ($this->modules as $module) {
-            $ql .= " {$module->getKeyName()} " . $module->toQL();
+            $ql .= str_repeat(' ', $index * self::TAB) . "{$module->getKeyName()} " . $module->toQL($index + 1);
         }
-        return $ql . "} ";
+        return $ql . str_repeat(' ', ($index * self::TAB) - self::TAB) . "}\n";
     }
 
     /**
@@ -155,26 +209,49 @@ class Graph
     /**
      * @return string
      */
-    public function query(): string
+    public function query($index = 0, $prettify = true): string
     {
-        $string = "{ {$this->getKeyName()} {$this->toQl()} }";
-        return preg_replace('/\s{2,}/', ' ', $string);
+        $string = str_repeat(" ", $index * self::TAB)
+            . "{\n" . str_repeat(" ", ($index + 1) * self::TAB)
+            . "{$this->getKeyName()} {$this->toQl($index + 2)}"
+            . "}";
+
+        if (!$prettify) {
+            return preg_replace(['/\n/', '/\s{2,}/i'], ['  ', '  '], $string);
+        }
+
+        return $string;
     }
 
-    private function buildNode($name, $arguments)
+    protected function buildKeyName($name, $arguments = null): string
+    {
+        $keyName = $name;
+
+        if (!empty($arguments)) {
+            $args = $this->buildArgs($arguments);
+            $keyName .= "({$args})";
+        }
+
+        return $keyName;
+    }
+
+    protected function buildArgs($arguments)
+    {
+        $builder = new ArrayToGraphQL($arguments);
+
+        return $builder->convert();
+    }
+
+    protected function buildNode($name, $arguments = null): Graph
     {
         $className = __NAMESPACE__ . '\\Entities\\' . ucfirst($name);
-        $args = " ";
-        if (isset($arguments[0])) {
-            foreach ($arguments[0] as $key => $value) {
-                $args .= "{$key}: {$value} ";
-            }
-        }
-        $keyName = "{$name}({$args})";
+
+        $keyName = $this->buildKeyName($name, $arguments[0] ?? null);
+
         if (class_exists($className)) {
-            $this->modules[$keyName] = (new $className())->setKeyName($keyName);
+            $this->modules[$keyName] = (new $className())->setKeyName($keyName)->setParentNode($this);
         } else {
-            $this->modules[$keyName] = (new Graph())->setKeyName($keyName);
+            $this->modules[$keyName] = (new Graph())->setKeyName($keyName)->setParentNode($this);
         }
 
         return $this->modules[$keyName];
