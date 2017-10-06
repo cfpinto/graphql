@@ -55,9 +55,9 @@ class ArrayToGraphQL
             if (!is_array($value)) {
                 $parsed .= $key . $this->parse($value) . ', ';
             } elseif (is_null(key($value)) || is_numeric(key($value))) {
-                $parsed .= $key . "[" . $this->parse($value) . "]";
+                $parsed .= $key . "[" . $this->parse($value) . "], ";
             } else {
-                $parsed .= $key . "{" . $this->parse($value) . "}";
+                $parsed .= $key . "{" . $this->parse($value) . "}, ";
             }
         }
 
