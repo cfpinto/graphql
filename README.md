@@ -153,3 +153,7 @@ mutation changeHeroCostumeColor(id: 'theHeroId', color: 'red') {
 #### Variables
 #### Directives
 #### Meta fields
+## Support on Beerpay
+Hey dude! Help me out for a couple of :beers:!
+
+[![Beerpay](https://beerpay.io/cfpinto/graphql/badge.svg?style=beer-square)](https://beerpay.io/cfpinto/graphql)  [![Beerpay](https://beerpay.io/cfpinto/graphql/make-wish.svg?style=flat-square)](https://beerpay.io/cfpinto/graphql?focus=wish)
