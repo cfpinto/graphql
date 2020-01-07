@@ -48,11 +48,14 @@ class Graph
     /**
      * @param string $keyName
      * @return Graph
-     * @throws \ReflectionException
      */
     public function setKeyName(string $keyName): Graph
     {
-        $this->keyName = new Alias($keyName ?? (new ReflectionClass($this))->getShortName());
+        try {
+            $this->keyName = new Alias($keyName ?? (new ReflectionClass($this))->getShortName());
+        } catch (\ReflectionException $e) {
+            $this->keyName = new Alias('catch');
+        }
         return $this;
     }
 
@@ -79,7 +82,6 @@ class Graph
      * Graph constructor.
      * @param null $name
      * @param null $properties
-     * @throws \ReflectionException
      */
     public function __construct($name = null, $properties = null)
     {
@@ -112,7 +114,6 @@ class Graph
      * @param $arguments
      *
      * @return Graph
-     * @throws Exception
      */
     public function __call($name, $arguments): Graph
     {
@@ -149,7 +150,6 @@ class Graph
     /**
      * @param string $object
      * @return Graph
-     * @throws \ReflectionException
      */
     public function on(string $object): Graph
     {
@@ -210,20 +210,31 @@ class Graph
     }
 
     /**
+     * @param      $index
+     * @param bool $prettify
+     *
      * @return string
      */
-    public function toQL($index): string
+    public function toQL($index, $prettify = true): string
     {
-        $ql = "{\n";
+        $tab = $prettify ? self::TAB : 0;
+        $crl = $prettify ? PHP_EOL : '';
+        $glue = $prettify ? '' : ' ';
+        
+        $ql = "{" . $crl;
+        $props = [];
+        $mods = [];
         foreach ($this->properties as $property) {
-            $ql .= str_repeat(' ', $index * self::TAB) . "{$property}\n";
+            
+            $props[] = str_repeat(' ', $index * $tab) . "{$property}" . $crl;
         }
 
         /** @var Graph $module */
         foreach ($this->modules as $module) {
-            $ql .= str_repeat(' ', $index * self::TAB) . "{$module->getKeyName()} " . $module->toQL($index + 1);
+            $mods[] = str_repeat(' ', $index * $tab) . "{$module->getKeyName()} " . $module->toQL($index + 1, $prettify) . $crl;
         }
-        return $ql . str_repeat(' ', ($index * self::TAB) - self::TAB) . "}\n";
+        $ql .= trim(implode($glue, array_merge($props, $mods)));
+        return $ql . str_repeat(' ', ($index * $tab) - $tab) . "}" . $crl;
     }
 
     /**
@@ -241,14 +252,12 @@ class Graph
      */
     public function query($index = 0, $prettify = true): string
     {
-        $string = str_repeat(" ", $index * self::TAB)
-            . "{\n" . str_repeat(" ", ($index + 1) * self::TAB)
-            . "{$this->getKeyName()} {$this->toQl($index + 2)}"
+        $tab = $prettify ? self::TAB : 0;
+        $crl = $prettify ? PHP_EOL : '';
+        $string = str_repeat(" ", $index * $tab)
+            . "{" . $crl . str_repeat(" ", ($index + 1) * $tab)
+            . "{$this->getKeyName()} {$this->toQl($index + 2, $prettify)}"
             . "}";
-
-        if (!$prettify) {
-            return preg_replace(['/\n/', '/\s{2,}/i'], ['  ', '  '], $string);
-        }
 
         return $string;
     }
