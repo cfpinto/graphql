@@ -8,11 +8,17 @@
 
 namespace GraphQL;
 
+use ReflectionClass;
+/**
+ * Class Graph
+ * @method self use (...$properties)
+ * @package GraphQL
+ */
 class Graph
 {
     const TAB = 2;
     /**
-     * @var array
+     * @var array|Graph[]
      */
     private $modules = [];
 
@@ -22,7 +28,7 @@ class Graph
     private $properties = [];
 
     /**
-     * @var string
+     * @var Alias
      */
     private $keyName;
 
@@ -32,21 +38,21 @@ class Graph
     private $parentNode;
 
     /**
-     * @return string
+     * @return Alias
      */
-    public function getKeyName(): string
+    public function getKeyName(): Alias
     {
-        return $this->keyName ?? strtolower(class_basename($this));
+        return $this->keyName;
     }
 
     /**
      * @param string $keyName
-     *
      * @return Graph
+     * @throws \ReflectionException
      */
     public function setKeyName(string $keyName): Graph
     {
-        $this->keyName = $keyName;
+        $this->keyName = new Alias($keyName ?? (new ReflectionClass($this))->getShortName());
         return $this;
     }
 
@@ -71,9 +77,9 @@ class Graph
 
     /**
      * Graph constructor.
-     *
-     * @param $name
-     * @param $properties
+     * @param null $name
+     * @param null $properties
+     * @throws \ReflectionException
      */
     public function __construct($name = null, $properties = null)
     {
@@ -116,8 +122,6 @@ class Graph
             default :
                 return $this->buildNode($name, $arguments);
         }
-
-        throw new Exception("method {$name} not found");
     }
 
     /**
@@ -134,14 +138,18 @@ class Graph
     public function get(): Graph
     {
         $args = func_get_args();
-        $this->properties = array_merge($this->properties, $args);
+        foreach ($args as $arg) {
+            $alias = new Alias($arg);
+            $this->properties[$alias->getKey()] = $alias;
+        }
+
         return $this;
     }
 
     /**
      * @param string $object
-     *
      * @return Graph
+     * @throws \ReflectionException
      */
     public function on(string $object): Graph
     {
@@ -168,6 +176,26 @@ class Graph
     }
 
     /**
+     * @param $alias
+     * @param null $who
+     * @return Graph
+     */
+    public function alias($alias, $who = null): Graph
+    {
+        if ($who && isset($this->modules[$who])) {
+            $this->modules[$who]->getKeyName()->setAlias($alias);
+        } elseif (!$who) {
+            $this->getKeyName()->setAlias($alias);
+        }
+
+        if ($who && isset($this->properties[$who])) {
+            $this->properties[$who]->setAlias($alias);
+        }
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -175,7 +203,7 @@ class Graph
         $array = [];
         /** @var Graph $module */
         foreach ($this->modules as $module) {
-            $array[$module->getKeyName()] = $module->toArray();
+            $array[(string)$module->getKeyName()] = $module->toArray();
         }
 
         return array_merge($array, $this->properties);
@@ -207,6 +235,8 @@ class Graph
     }
 
     /**
+     * @param int $index
+     * @param bool $prettify
      * @return string
      */
     public function query($index = 0, $prettify = true): string

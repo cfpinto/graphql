@@ -91,7 +91,7 @@ echo $hero->use('name')
         ->use('hasCape')
     ->prev()
     ->on('StrongHero')
-        ->use('strengthLevel)
+        ->use('strengthLevel')
     ->prev()
     ->friends(['first'=>2])
         ->use('name')
@@ -146,9 +146,40 @@ mutation changeHeroCostumeColor(id: 'theHeroId', color: 'red') {
 }
 ```
 
+#### Aliases
+For the element of surprise, you might need to name some of the hero's properties differently; You might want to call 
+friends as partners_in_good or name as call_me_this
+
+```php
+$hero = new GraphQL\Graph('hero');
+echo $hero->use('name')
+    ->alias('call_me_this', 'name')
+    ->friends(['first'=>2])
+        ->alias('partners_in_good')
+        ->use('name')
+    ->prev()
+    ->costumes
+        ->color
+        ->query();
+```
+will generate
+```text
+{
+    hero {
+        call_me_this: name
+        partners_in_good: friends(first: 2) {
+            name
+        }
+        costumes {
+            color
+        }
+    }
+}
+
+```
+
 ### Coming Soon
 
-#### Aliases
 #### Fragments
 #### Variables
 #### Directives
