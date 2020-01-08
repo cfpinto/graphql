@@ -5,6 +5,7 @@ namespace tests\functional;
 
 
 use GraphQL\Graph;
+use GraphQL\Node;
 use GraphQL\Mutation;
 use PHPUnit\Framework\TestCase;
 
@@ -13,7 +14,7 @@ class HeroTest extends TestCase
     public function testHeroGet()
     {
         $hero = new Graph('hero', ['id' => '1']);
-        $this->assertInstanceOf(Graph::class, $hero);
+        $this->assertInstanceOf(Node::class, $hero);
         $hero->use('name', 'id');
         $this->assertEquals('{hero(id: "1") {name id}}', $hero->query(0, false));
         $friends = $hero->friends(['first' => 1])->use('name');

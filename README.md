@@ -178,9 +178,27 @@ will generate
 
 ```
 
-### Coming Soon
-
 #### Fragments
+Sorry have no super hero narrative for this :D . sticking to good old technical explanation
+
+To use fragments declare the fragment as you would a graph and then use it within a `->use()` call as you would with a regular property
+
+```php
+$fragment = new GraphQL\Fragment('properties');
+$hero = new GraphQL\Graph('hero');
+echo $hero->use('name', $fragment)->query();
+```
+will generate
+```text
+{
+    hero {
+        name,
+        ...properties
+    }
+}
+```
+
+### Coming Soon
 #### Variables
 #### Directives
 #### Meta fields
