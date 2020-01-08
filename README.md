@@ -184,7 +184,8 @@ Sorry have no super hero narrative for this :D . sticking to good old technical 
 To use fragments declare the fragment as you would a graph and then use it within a `->use()` call as you would with a regular property
 
 ```php
-$fragment = new GraphQL\Fragment('properties');
+$fragment = new GraphQL\Fragment('properties', 'Hero');
+$fragment->use('id', 'age');
 $hero = new GraphQL\Graph('hero');
 echo $hero->use('name', $fragment)->query();
 ```
@@ -195,6 +196,11 @@ will generate
         name,
         ...properties
     }
+}
+
+fragment properties on Hero {
+    id
+    age
 }
 ```
 
