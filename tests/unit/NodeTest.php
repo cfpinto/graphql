@@ -4,15 +4,15 @@ namespace tests\unit;
 
 
 use GraphQL\Alias;
-use GraphQL\Graph;
+use GraphQL\Node;
 use PHPUnit\Framework\TestCase;
 
-class GraphTest extends TestCase
+class NodeTest extends TestCase
 {
     public function testGetSetKeyName()
     {
-        $graph = new Graph('hero', ['id' => '1']);
-        $this->assertInstanceOf(Graph::class, $graph);
+        $graph = new Node('hero', ['id' => '1']);
+        $this->assertInstanceOf(Node::class, $graph);
         $this->assertInstanceOf(Alias::class, $graph->getKeyName());
         $this->assertEquals('hero(id: "1")', (string)$graph->getKeyName());
 
@@ -20,28 +20,28 @@ class GraphTest extends TestCase
     }
 
     /**
-     * @param Graph $parent
+     * @param Node $parent
      *
      * @depends testGetSetKeyName
-     * @return Graph
+     * @return Node
      */
-    public function testGetSetParentNode(Graph $parent)
+    public function testGetSetParentNode(Node $parent)
     {
-        $node = new Graph('costumes');
+        $node = new Node('costumes');
         $node->setParentNode($parent);
-        $this->assertInstanceOf(Graph::class, $node->getParentNode());
+        $this->assertInstanceOf(Node::class, $node->getParentNode());
 
         return $parent;
     }
 
     /**
-     * @param Graph $graph
+     * @param Node $graph
      *
      * @depends testGetSetParentNode
      *
-     * @return Graph
+     * @return Node
      */
-    public function testGet(Graph $graph)
+    public function testGet(Node $graph)
     {
         $graph->use('name', 'id');
 
@@ -51,29 +51,29 @@ class GraphTest extends TestCase
     }
 
     /**
-     * @param Graph $graph
+     * @param Node $graph
      *
      * @depends testGet
      *
-     * @return Graph
+     * @return Node
      */
-    public function testOn(Graph $graph)
+    public function testOn(Node $graph)
     {
         $node = $graph->on('FooBar')->use('bar_foo');
-        $this->assertInstanceOf(Graph::class, $node);
+        $this->assertInstanceOf(Node::class, $node);
         $this->assertEquals('... on FooBar', (string)$node->getKeyName());
 
         return $graph;
     }
 
     /**
-     * @param Graph $graph
+     * @param Node $graph
      *
      * @depends testOn
      *
-     * @return Graph
+     * @return Node
      */
-    public function testAlias(Graph $graph)
+    public function testAlias(Node $graph)
     {
         $graph->alias('bar');
         $this->assertEquals('{bar: hero(id: "1") {name id ... on FooBar {bar_foo}}}', $graph->query(0, false));
@@ -82,13 +82,13 @@ class GraphTest extends TestCase
     }
 
     /**
-     * @param Graph $graph
+     * @param Node $graph
      *
      * @depends testAlias
      *
-     * @return Graph
+     * @return Node
      */
-    public function testToArray(Graph $graph)
+    public function testToArray(Node $graph)
     {
         $this->assertIsArray($graph->toArray());
 
@@ -96,11 +96,11 @@ class GraphTest extends TestCase
     }
 
     /**
-     * @param Graph $graph
+     * @param Node $graph
      *
      * @depends testToArray
      */
-    public function testQuery(Graph $graph)
+    public function testQuery(Node $graph)
     {
         $this->assertIsString($graph->query());
         $this->assertEquals('{bar: hero(id: "1") {name id ... on FooBar {bar_foo}}}', $graph->query(0, false));

@@ -12,7 +12,7 @@ namespace GraphQL;
  * Class Mutation
  * @package GraphQL
  */
-class Mutation extends Graph
+class Mutation extends Node
 {
 
     /**
