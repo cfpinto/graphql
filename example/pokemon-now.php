@@ -7,12 +7,13 @@
  */
 require_once 'vendor/autoload.php';
 
+$variable = new \GraphQL\Variable('name', 'String', 'Pikachu');
 $fragment = new \GraphQL\Fragment('pokemonFields', 'Pokemon');
 $fragment->use('number', 'name');
-$pokemon = new \GraphQL\Graph('pokemon', ['name' => 'Pikachu']);
+$pokemon = new \GraphQL\Graph('pokemon', ['name' => $variable]);
 $pokemon->use('id', $fragment)
     ->attacks
-    ->special
+    ->special(['name' => $variable])
     ->use('name', 'type', 'damage');
 
 echo $pokemon;

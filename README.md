@@ -179,7 +179,7 @@ will generate
 ```
 
 #### Fragments
-Sorry have no super hero narrative for this :D . sticking to good old technical explanation
+Sorry have no super hero narrative from here :D . sticking to good old technical explanation
 
 To use fragments declare the fragment as you would a graph and then use it within a `->use()` call as you would with a regular property
 
@@ -193,7 +193,7 @@ will generate
 ```text
 {
     hero {
-        name,
+        name
         ...properties
     }
 }
@@ -204,10 +204,66 @@ fragment properties on Hero {
 }
 ```
 
-### Coming Soon
 #### Variables
-#### Directives
+
+The use of variables feels less necessary because we're using PHP to build the query. Still...
+
+```php
+$variable = new GraphQL\Variable('name', 'String');
+$hero = new GraphQL\Graph('hero', ['name' => $variable]);
+echo $hero->use('name')->query();
+```
+will generate
+```text
+query getGraph($name: String){
+    hero(name: $name) {
+        name
+    }
+}
+```
+ 
+### Coming Soon
 #### Meta fields
+you can also use meta fields the same way you would request a property
+
+```php
+$variable = new GraphQL\Variable('name', 'String');
+$hero = new GraphQL\Graph('hero', ['name' => $variable]);
+echo $hero->use('name', '__typename')->query();
+```
+
+will generate
+
+```text
+query getGraph($name: String){
+    hero(name: $name) {
+        name
+        __typename
+    }
+}
+```
+
+Which can also be aliased 
+
+```php
+$variable = new GraphQL\Variable('name', 'String');
+$hero = new GraphQL\Graph('hero', ['name' => $variable]);
+echo $hero->use('name', '__typename')
+    ->alias('type', '__typename')
+    ->query();
+```
+
+will generate
+
+```text
+query getGraph($name: String){
+    hero(name: $name) {
+        name
+        type: __typename
+    }
+}
+```
+
 ## Support on Beerpay
 Hey dude! Help me out for a couple of :beers:!
 
