@@ -13,8 +13,13 @@ namespace GraphQL;
  * An helper to convert Arrays into GraphQL properties
  * @package GraphQL
  */
-class ArrayToGraphQL
+class Arguments
 {
+    /**
+     * @var Variable[]
+     */
+    private $variables;
+    
     /**
      * @var array
      */
@@ -28,6 +33,7 @@ class ArrayToGraphQL
     public function __construct(array $array)
     {
         $this->array = $array;
+        $this->variables = [];
     }
 
     /**
@@ -52,7 +58,11 @@ class ArrayToGraphQL
         $parsed = "";
         foreach ($input as $key => $value) {
             $key = (!is_numeric($key) ? ($key . ": " ) : '');
-            if (!is_array($value)) {
+            /** @var Variable $value */
+            if ($value instanceof Variable) {
+                $parsed .= $key . ' $' . $value->getName();
+                $this->variables[$value->getName()] = $value;
+            } elseif (!is_array($value)) {
                 $parsed .= $key . $this->parse($value) . ', ';
             } elseif (is_null(key($value)) || is_numeric(key($value))) {
                 $parsed .= $key . "[" . $this->parse($value) . "], ";
@@ -62,5 +72,13 @@ class ArrayToGraphQL
         }
 
         return rtrim($parsed, ', ');
+    }
+
+    /**
+     * @return Variable[]
+     */
+    public function getVariables(): array
+    {
+        return $this->variables;
     }
 }

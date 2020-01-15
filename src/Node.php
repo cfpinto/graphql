@@ -30,6 +30,11 @@ class Node
     private $properties = [];
 
     /**
+     * @var Graph
+     */
+    private $root;
+
+    /**
      * @var Alias
      */
     private $keyName;
@@ -140,25 +145,19 @@ class Node
     }
 
     /**
-     * @return $this
+     * @return Node
+     * @throws Exception
      */
     public function get(): Node
     {
         $args = func_get_args();
         foreach ($args as $arg) {
             if ($arg instanceof Fragment) {
-                /** @var Graph $parent */
-                $current = $this;
-                $parent = null;
-                while ($parent = $current->getParentNode()) {
-                    $current = $parent;
-                }
+                $arg = $this->handleFragment($arg);
+            }
 
-                if ($current instanceof Graph) {
-                    $current->addFragment($arg);
-                }
-                
-                $arg = '...' . $arg->getKeyName();
+            if ($arg instanceof Variable) {
+                throw new Exception('Invalid argument type Variable');
             }
 
             $alias = new Alias($arg);
@@ -304,9 +303,15 @@ class Node
 
     protected function buildArgs($arguments)
     {
-        $builder = new ArrayToGraphQL($arguments);
+        $builder = new Arguments($arguments);
+        
+        $query = $builder->convert();
 
-        return $builder->convert();
+        foreach ($builder->getVariables() as $variable) {
+            $this->getRootNode()->addVariable($variable);
+        }
+
+        return $query;
     }
 
     protected function buildNode($name, $arguments = null): Node
@@ -322,6 +327,52 @@ class Node
         }
 
         return $this->modules[$keyName];
+    }
+
+    protected function handleVariable(Variable $variable): string
+    {
+        if (($current = $this->getRootNode())) {
+            $current->addVariable($variable);
+        }
+
+        return '$' . $variable->getName();
+    }
+
+    /**
+     * @param Fragment $fragment
+     *
+     * @return string
+     */
+    protected function handleFragment(Fragment $fragment): string
+    {
+        if (($current = $this->getRootNode())) {
+            $current->addFragment($fragment);
+        }
+
+        return '...' . $fragment->getKeyName();
+    }
+
+    /**
+     * @return Graph|null
+     */
+    protected function getRootNode(): ?Graph
+    {
+        /** @var Graph $parent */
+        if (!empty($this->root)) {
+            return $this->root;
+        }
+        
+        $current = $this;
+        $parent = null;
+        while ($parent = $current->getParentNode()) {
+            $current = $parent;
+        }
+
+        if ($current instanceof Graph) {
+            return ($this->root = $current);
+        }
+
+        return null;
     }
 
 }
