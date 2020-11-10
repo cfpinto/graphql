@@ -34,6 +34,17 @@ class Mutation extends Node
      */
     public function query($index = 0, $prettify = true): string
     {
+        if ($this->hasVariables()) {
+            $args = [];
+
+            foreach ($this->variables as $variable) {
+                $args[] = $variable->parse();
+            }
+
+            return sprintf("mutation %sMutation(%s)", ucfirst($this->getBaseName()), implode(', ', $args)) .
+                 trim(parent::query($index, $prettify));
+        }
+
         return "mutation " . parent::query($index, $prettify);
     }
 

@@ -17,7 +17,8 @@ $hero = new GraphQL\Graph('hero');
 echo $hero->use('name')
     ->friends
         ->use('name')
-            ->query();
+    ->root()
+        ->query();
 ``` 
 
 will generate 
@@ -40,7 +41,8 @@ $hero = new GraphQL\Graph('hero');
 echo $hero->use('name')
     ->friends(['first'=>2])
         ->use('name')
-            ->query();
+    ->root()
+        ->query();
 ```
 will generate
 ```text
@@ -65,6 +67,7 @@ echo $hero->use('name')
     ->prev()
     ->costumes
         ->color
+    ->root()
         ->query();
 ```
 will generate
@@ -98,6 +101,7 @@ echo $hero->use('name')
     ->prev()
     ->costumes
         ->color
+    ->root()
         ->query();
 ```
 Will generate
@@ -121,31 +125,6 @@ Will generate
 }
 ```
 
-#### Mutations
-After you chose your Hero and he takes you as his sidekick he will let you do some help him with some of his daily routine.
-He might even let you choose his costume color. How cool is that?
-
-```php
-$mutation = new GraphQL\Mutation('changeHeroCostumeColor', ['id' => 'theHeroId', 'color'=>'red']);
-echo $mutation
-    ->hero
-        ->use('name')
-        ->costumes
-            ->use('color')
-            ->query();
-``` 
-Will generate
-```text
-mutation changeHeroCostumeColor(id: 'theHeroId', color: 'red') {
-    hero {
-        name
-        costumes {
-            color
-        }
-    }
-}
-```
-
 #### Aliases
 For the element of surprise, you might need to name some of the hero's properties differently; You might want to call 
 friends as partners_in_good or name as call_me_this
@@ -160,6 +139,7 @@ echo $hero->use('name')
     ->prev()
     ->costumes
         ->color
+    ->root()
         ->query();
 ```
 will generate
@@ -188,6 +168,7 @@ $fragment = new GraphQL\Fragment('properties', 'Hero');
 $fragment->use('id', 'age');
 $hero = new GraphQL\Graph('hero');
 echo $hero->use('name', $fragment)->query();
+echo $fragment->query();
 ```
 will generate
 ```text
@@ -222,7 +203,6 @@ query getGraph($name: String){
 }
 ```
  
-### Coming Soon
 #### Meta fields
 you can also use meta fields the same way you would request a property
 
@@ -260,6 +240,56 @@ query getGraph($name: String){
     hero(name: $name) {
         name
         type: __typename
+    }
+}
+```
+
+#### Mutations
+After you chose your Hero and he takes you as his sidekick he will let you do some help him with some of his daily routine.
+He might even let you choose his costume color. How cool is that?
+
+```php
+$mutation = new GraphQL\Mutation('changeHeroCostumeColor', ['id' => 'theHeroId', 'color'=>'red']);
+$mutation
+    ->hero
+        ->use('name')
+        ->costumes
+            ->use('color')
+    ->root()
+        ->query();
+``` 
+Will generate
+```text
+mutation changeHeroCostumeColor(id: 'theHeroId', color: 'red') {
+    hero {
+        name
+        costumes {
+            color
+        }
+    }
+}
+```
+With variables
+```php
+$mutation = new GraphQL\Mutation('changeHeroCostumeColor', ['id' => new GraphQL\Variable('uuid', 'String', ''), new GraphQL\Variable('color', 'String', '')]);
+$mutation
+    ->hero
+        ->use('name')
+        ->costumes
+            ->use('color')
+    ->root()
+        ->query();
+``` 
+Will generate
+```text
+mutation ChangeHeroCostumeColorMutation($uuid: String, $color: String) {
+    changeHeroCostumeColorAction(id: $uuid, color: $color) {
+        hero {
+            name
+            costumes {
+                color
+            }
+        }
     }
 }
 ```
