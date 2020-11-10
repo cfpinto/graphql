@@ -9,8 +9,9 @@
 namespace GraphQL;
 
 /**
- * Class ArrayToGraphQL
+ * Class Arguments
  * An helper to convert Arrays into GraphQL properties
+ *
  * @package GraphQL
  */
 class Arguments
@@ -19,7 +20,7 @@ class Arguments
      * @var Variable[]
      */
     private $variables;
-    
+
     /**
      * @var array
      */
@@ -45,7 +46,7 @@ class Arguments
     }
 
     /**
-     * @param $input
+     * @param mixed $input
      *
      * @return string
      */
@@ -57,17 +58,19 @@ class Arguments
 
         $parsed = "";
         foreach ($input as $key => $value) {
-            $key = (!is_numeric($key) ? ($key . ": " ) : '');
             /** @var Variable $value */
             if ($value instanceof Variable) {
-                $parsed .= $key . ' $' . $value->getName();
+                $parsed .= (is_numeric($key) ? $value->getName() : $key) . ': $' . $value->getName() . ', ';
                 $this->variables[$value->getName()] = $value;
-            } elseif (!is_array($value)) {
-                $parsed .= $key . $this->parse($value) . ', ';
-            } elseif (is_null(key($value)) || is_numeric(key($value))) {
-                $parsed .= $key . "[" . $this->parse($value) . "], ";
             } else {
-                $parsed .= $key . "{" . $this->parse($value) . "}, ";
+                $key = (!is_numeric($key) ? ($key . ": ") : '');
+                if (!is_array($value)) {
+                    $parsed .= $key . $this->parse($value) . ', ';
+                } elseif (is_null(key($value)) || is_numeric(key($value))) {
+                    $parsed .= $key . "[" . $this->parse($value) . "], ";
+                } else {
+                    $parsed .= $key . "{" . $this->parse($value) . "}, ";
+                }
             }
         }
 

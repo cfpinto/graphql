@@ -11,7 +11,7 @@ namespace GraphQL;
 use ReflectionClass;
 
 /**
- * Class Graph
+ * Class Node
  * @method self use (...$properties)
  *
  * @package GraphQL
@@ -19,6 +19,17 @@ use ReflectionClass;
 class Node
 {
     const TAB = 2;
+
+    /**
+     * @var Fragment[]
+     */
+    private $fragments = [];
+
+    /**
+     * @var Variable[]
+     */
+    protected $variables = [];
+
     /**
      * @var array|Node[]
      */
@@ -30,7 +41,7 @@ class Node
     private $properties = [];
 
     /**
-     * @var Graph
+     * @var Node
      */
     private $root;
 
@@ -40,9 +51,54 @@ class Node
     private $keyName;
 
     /**
+     * @var string
+     */
+    private $baseName;
+
+    /**
+     * @return string
+     */
+    public function getBaseName(): string
+    {
+        return $this->baseName;
+    }
+
+    /**
      * @var Node
      */
     private $parentNode;
+
+    /**
+     * @return array
+     */
+    public function getFragments(): array
+    {
+        return $this->fragments;
+    }
+
+    /**
+     * @param Fragment $fragment
+     *
+     * @return $this
+     */
+    public function addFragment(Fragment $fragment): self
+    {
+        $this->fragments[$fragment->getKeyName()->getKey()] = $fragment;
+
+        return $this;
+    }
+
+    /**
+     * @param Fragment $fragment
+     *
+     * @return $this
+     */
+    public function removeFragment(Fragment $fragment): self
+    {
+        unset($this->fragments[$fragment->getKeyName()->getKey()]);
+
+        return $this;
+    }
 
     /**
      * @return Alias
@@ -89,7 +145,7 @@ class Node
     }
 
     /**
-     * Graph constructor.
+     * Node constructor.
      *
      * @param null $name
      * @param null $properties
@@ -98,6 +154,7 @@ class Node
     {
         if ($name) {
             $this->setKeyName($this->buildKeyName($name, $properties));
+            $this->baseName = $name;
         }
     }
 
@@ -175,8 +232,11 @@ class Node
     public function on(string $object): Node
     {
         $key = "... on {$object}";
+        $onNode = new Node();
+        $onNode->setParentNode($this)
+            ->setKeyName($key);
 
-        return ($this->modules[$key] = (new Node())->setKeyName($key));
+        return ($this->modules[$key] = $onNode);
     }
 
     /**
@@ -185,6 +245,14 @@ class Node
     public function prev(): Node
     {
         return $this->getParentNode();
+    }
+
+    /**
+     * @return Node
+     */
+    public function root(): Node
+    {
+        return $this->getRootNode();
     }
 
     /**
@@ -289,6 +357,12 @@ class Node
         return $string;
     }
 
+    /**
+     * @param string $name
+     * @param mixed  $arguments
+     *
+     * @return string
+     */
     protected function buildKeyName($name, $arguments = null): string
     {
         $keyName = $name;
@@ -304,7 +378,7 @@ class Node
     protected function buildArgs($arguments)
     {
         $builder = new Arguments($arguments);
-        
+
         $query = $builder->convert();
 
         foreach ($builder->getVariables() as $variable) {
@@ -338,6 +412,25 @@ class Node
         return '$' . $variable->getName();
     }
 
+    protected function addVariable(Variable $variable): self
+    {
+        $this->variables[$variable->getName()] = $variable;
+
+        return $this;
+    }
+
+    public function removeVariable(Variable $variable): self
+    {
+        unset($this->variables[$variable->getName()]);
+
+        return $this;
+    }
+
+    public function hasVariables(): bool
+    {
+        return count($this->variables);
+    }
+
     /**
      * @param Fragment $fragment
      *
@@ -353,26 +446,22 @@ class Node
     }
 
     /**
-     * @return Graph|null
+     * @return Node
      */
-    protected function getRootNode(): ?Graph
+    protected function getRootNode(): ?Node
     {
-        /** @var Graph $parent */
+        /** @var Node $parent */
         if (!empty($this->root)) {
             return $this->root;
         }
-        
+
         $current = $this;
         $parent = null;
         while ($parent = $current->getParentNode()) {
             $current = $parent;
         }
 
-        if ($current instanceof Graph) {
-            return ($this->root = $current);
-        }
-
-        return null;
+        return ($this->root = $current);
     }
 
 }
