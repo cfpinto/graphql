@@ -28,7 +28,7 @@ class Variable
      * @param string      $type
      * @param string|null $default
      */
-    public function __construct(string $name, string $type, string $default = null)
+    public function __construct(string $name, string $type, string $default = '')
     {
         $this->setName($name);
         $this->setType($type);
