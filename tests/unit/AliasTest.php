@@ -4,7 +4,7 @@
 namespace tests\unit;
 
 
-use GraphQL\Alias;
+use GraphQL\Entities\Alias;
 use PHPUnit\Framework\TestCase;
 
 final class AliasTest extends TestCase
@@ -18,7 +18,7 @@ final class AliasTest extends TestCase
         $this->assertEquals('bar', $alias->getAlias());
         $this->assertEquals('bar: foo', (string)$alias);
     }
-    
+
     public function testSetGetKey()
     {
         $alias = new Alias('foo');
@@ -28,7 +28,7 @@ final class AliasTest extends TestCase
         $this->assertEquals('bar', $alias->getKey());
         $this->assertEquals('bar', (string)$alias);
     }
-    
+
     public function testToString()
     {
         $alias = new Alias('foo');

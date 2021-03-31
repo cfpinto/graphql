@@ -3,8 +3,8 @@
 namespace tests\unit;
 
 
-use GraphQL\Alias;
-use GraphQL\Node;
+use GraphQL\Entities\Alias;
+use GraphQL\Entities\Node;
 use PHPUnit\Framework\TestCase;
 
 class NodeTest extends TestCase

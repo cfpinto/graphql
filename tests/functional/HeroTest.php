@@ -4,9 +4,9 @@
 namespace tests\functional;
 
 
-use GraphQL\Graph;
-use GraphQL\Node;
-use GraphQL\Mutation;
+use GraphQL\Entities\Graph;
+use GraphQL\Entities\Node;
+use GraphQL\Entities\Mutation;
 use PHPUnit\Framework\TestCase;
 
 class HeroTest extends TestCase
@@ -26,7 +26,7 @@ class HeroTest extends TestCase
         $costumes->alias('cosplay');
         $this->assertEquals('{hero(id: "1") {name id friends(first: 1) {name} cosplay: costumes {color: colour}}}', $hero->query(0, false));
     }
-    
+
     public function testHeroPut()
     {
         $mutation = new Mutation('changeHeroCostumeColor', ['id' => 'theHeroId', 'color'=>'red']);
@@ -35,7 +35,7 @@ class HeroTest extends TestCase
             ->use('name')
             ->costumes
             ->use('color');
-        
+
         $this->assertEquals('mutation {changeHeroCostumeColor(id: "theHeroId", color: "red") {hero {name costumes {color}}}}', $mutation->query(0, false));
     }
 }

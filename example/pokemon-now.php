@@ -7,12 +7,14 @@
  */
 require_once 'vendor/autoload.php';
 
-$variable = new \GraphQL\Variable('name', 'String', 'Pikachu');
-$fragment = new \GraphQL\Fragment('pokemonFields', 'Pokemon');
+$variable = new \GraphQL\Entities\Variable('name', 'String', 'Pikachu');
+$fragment = new \GraphQL\Entities\Fragment('pokemonFields', 'Pokemon');
 $fragment->use('number', 'name');
-$pokemon = new \GraphQL\Graph('pokemon', ['name' => $variable]);
+$pokemon = new \GraphQL\Entities\Query('pokemon');
 $pokemon->use('id', $fragment)
-    ->attacks
+    ->on('Picka')
+    ->use('voltage')
+    ->prev()
     ->special(['name' => $variable])
     ->use('name', 'type', 'damage');
 

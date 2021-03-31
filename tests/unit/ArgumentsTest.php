@@ -1,7 +1,7 @@
 <?php
 namespace tests\unit;
 
-use GraphQL\Arguments;
+use GraphQL\Collections\ArgumentsCollection;
 use PHPUnit\Framework\TestCase;
 
 final class ArgumentsTest extends TestCase
@@ -11,7 +11,7 @@ final class ArgumentsTest extends TestCase
      */
     public function testConvert($data, $assertion)
     {
-        $arrayToGraphQL = new Arguments($data);
+        $arrayToGraphQL = new ArgumentsCollection($data);
         $this->assertIsString($arrayToGraphQL->convert());
         $this->assertEquals($assertion, $arrayToGraphQL->convert());
     }

@@ -6,8 +6,17 @@
  * Time: 15:32
  */
 
-namespace GraphQL;
+namespace GraphQL\Entities;
 
+use GraphQL\Collections\ArgumentsCollection;
+use GraphQL\Contracts\Entities\AliasInterface;
+use GraphQL\Contracts\Entities\FragmentInterface;
+use GraphQL\Contracts\Entities\NodeInterface;
+use GraphQL\Contracts\Entities\RootNodeInterface;
+use GraphQL\Contracts\Entities\VariableInterface;
+use GraphQL\Contracts\Properties\HasFragmentsInterface;
+use GraphQL\Exceptions\InvalidArgumentTypeException;
+use GraphQL\Traits\HasFragmentsTrait;
 use ReflectionClass;
 
 /**
@@ -16,106 +25,111 @@ use ReflectionClass;
  *
  * @package GraphQL
  */
-class Node
+class OldNode implements NodeInterface
 {
-    const TAB = 2;
+    use HasFragmentsTrait;
 
     /**
-     * @var Fragment[]
+     * @var FragmentInterface[]
      */
-    private $fragments = [];
+    private array $fragments = [];
 
     /**
-     * @var Variable[]
+     * @var VariableInterface[]
      */
-    protected $variables = [];
+    protected array $variables = [];
 
     /**
-     * @var array|Node[]
+     * @var NodeInterface[]
      */
-    private $modules = [];
+    private array $modules = [];
 
-    /**
-     * @var array
-     */
-    private $properties = [];
+    private array $properties = [];
 
-    /**
-     * @var Node
-     */
-    private $root;
+    private RootNodeInterface $root;
 
-    /**
-     * @var Alias
-     */
-    private $keyName;
+    private Alias $keyName;
 
-    /**
-     * @var string
-     */
-    private $baseName;
+    private string $baseName;
 
-    /**
-     * @return string
-     */
+    private ?NodeInterface $parentNode = null;
+
+    public function __construct(string $name = null, array $properties = null)
+    {
+        if ($name) {
+            $this->setKeyName($this->buildKeyName($name, $properties));
+            $this->setBaseName($name);
+        }
+    }
+
+    public function __get($name): NodeInterface
+    {
+        return $this->buildNode($name);
+    }
+
+    public function __set(string $name, NodeInterface $value)
+    {
+        $this->modules[$name] = $value;
+    }
+
+    public function __call(string $name, array $arguments): NodeInterface
+    {
+        switch ($name) {
+            case "use":
+                return $this->get(...$arguments);
+            default :
+                return $this->buildNode($name, $arguments);
+        }
+    }
+
+    public function __toString(): string
+    {
+        return $this->query();
+    }
+
     public function getBaseName(): string
     {
         return $this->baseName;
     }
 
-    /**
-     * @var Node
-     */
-    private $parentNode;
+    public function setBaseName(string $baseName): self
+    {
+        $this->baseName = $baseName;
+
+        return $this;
+    }
 
     /**
-     * @return array
+     * @return FragmentInterface[]
      */
     public function getFragments(): array
     {
         return $this->fragments;
     }
 
-    /**
-     * @param Fragment $fragment
-     *
-     * @return $this
-     */
-    public function addFragment(Fragment $fragment): self
+    public function addFragment(FragmentInterface $fragment): self
     {
         $this->fragments[$fragment->getKeyName()->getKey()] = $fragment;
 
         return $this;
     }
 
-    /**
-     * @param Fragment $fragment
-     *
-     * @return $this
-     */
-    public function removeFragment(Fragment $fragment): self
+    public function removeFragment(FragmentInterface $fragment): self
     {
         unset($this->fragments[$fragment->getKeyName()->getKey()]);
 
         return $this;
     }
 
-    /**
-     * @return Alias
-     */
-    public function getKeyName(): Alias
+    public function getKeyName(): AliasInterface
     {
         return $this->keyName;
     }
 
-    /**
-     * @param string $keyName
-     *
-     * @return Node
-     */
-    public function setKeyName(string $keyName): Node
+    public function setKeyName(string $keyName): self
     {
         try {
+            //:TODO why I need reflection
             $this->keyName = new Alias($keyName ?? (new ReflectionClass($this))->getShortName());
         } catch (\ReflectionException $e) {
             $this->keyName = new Alias('catch');
@@ -124,133 +138,24 @@ class Node
         return $this;
     }
 
-    /**
-     * @return Node|null
-     */
-    public function getParentNode(): ?Node
+    public function getParentNode(): ?NodeInterface
     {
         return $this->parentNode;
     }
 
-    /**
-     * @param Node $parentNode
-     *
-     * @return $this
-     */
-    public function setParentNode(Node $parentNode): Node
+    public function setParentNode(NodeInterface $parentNode): self
     {
         $this->parentNode = $parentNode;
 
         return $this;
     }
 
-    /**
-     * Node constructor.
-     *
-     * @param null $name
-     * @param null $properties
-     */
-    public function __construct($name = null, $properties = null)
-    {
-        if ($name) {
-            $this->setKeyName($this->buildKeyName($name, $properties));
-            $this->baseName = $name;
-        }
-    }
-
-    /**
-     * @param $name
-     *
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->buildNode($name);
-    }
-
-    /**
-     * @param       $name
-     * @param Node  $value
-     */
-    public function __set($name, Node $value)
-    {
-        $this->modules[$name] = $value;
-    }
-
-    /**
-     * @param $name
-     * @param $arguments
-     *
-     * @return Node
-     */
-    public function __call($name, $arguments): Node
-    {
-        switch ($name) {
-            case "use":
-                return call_user_func_array([$this, 'get'], $arguments);
-            default :
-                return $this->buildNode($name, $arguments);
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->query();
-    }
-
-    /**
-     * @return Node
-     * @throws Exception
-     */
-    public function get(): Node
-    {
-        $args = func_get_args();
-        foreach ($args as $arg) {
-            if ($arg instanceof Fragment) {
-                $arg = $this->handleFragment($arg);
-            }
-
-            if ($arg instanceof Variable) {
-                throw new Exception('Invalid argument type Variable');
-            }
-
-            $alias = new Alias($arg);
-            $this->properties[$alias->getKey()] = $alias;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param string $object
-     *
-     * @return Node
-     */
-    public function on(string $object): Node
-    {
-        $key = "... on {$object}";
-        $onNode = new Node();
-        $onNode->setParentNode($this)
-            ->setKeyName($key);
-
-        return ($this->modules[$key] = $onNode);
-    }
-
-    /**
-     * @return Node
-     */
-    public function prev(): Node
+    public function prev(): NodeInterface
     {
         return $this->getParentNode();
     }
 
-    /**
-     * @return Node
-     */
-    public function root(): Node
+    public function root(): RootNodeInterface
     {
         return $this->getRootNode();
     }
@@ -258,7 +163,7 @@ class Node
     /**
      * @return Node
      */
-    public function clear(): Node
+    public function clear(): self
     {
         $this->modules = [];
         $this->properties = [];
@@ -266,13 +171,7 @@ class Node
         return $this;
     }
 
-    /**
-     * @param      $alias
-     * @param null $who
-     *
-     * @return Node
-     */
-    public function alias($alias, $who = null): Node
+    public function alias(string $alias, ?string $who = null): self
     {
         if ($who && isset($this->modules[$who])) {
             $this->modules[$who]->getKeyName()->setAlias($alias);
@@ -308,7 +207,7 @@ class Node
      * @return string
      * @todo this method looks weird needs refactoring
      */
-    public function toQL($index, $prettify = true): string
+    public function toQL(int $index = 0, $prettify = true): string
     {
         $tab = $prettify ? self::TAB : 0;
         $crl = $prettify ? PHP_EOL : '';
@@ -345,7 +244,7 @@ class Node
      *
      * @return string
      */
-    public function query($index = 0, $prettify = true): string
+    public function query(int $index = 0, $prettify = true): string
     {
         $tab = $prettify ? self::TAB : 0;
         $crl = $prettify ? PHP_EOL : '';
@@ -355,6 +254,40 @@ class Node
             . "}";
 
         return $string;
+    }
+
+    public function removeVariable(VariableInterface $variable): self
+    {
+        unset($this->variables[$variable->getName()]);
+
+        return $this;
+    }
+
+    public function hasVariables(): bool
+    {
+        return count($this->variables);
+    }
+
+    /**
+     * @throws InvalidArgumentTypeException
+     */
+    protected function get(): self
+    {
+        $args = func_get_args();
+        foreach ($args as $arg) {
+            if ($arg instanceof Fragment) {
+                $arg = $this->handleFragment($arg);
+            }
+
+            if ($arg instanceof Variable) {
+                throw new InvalidArgumentTypeException(Variable::class);
+            }
+
+            $alias = new Alias($arg);
+            $this->properties[$alias->getKey()] = $alias;
+        }
+
+        return $this;
     }
 
     /**
@@ -377,7 +310,7 @@ class Node
 
     protected function buildArgs($arguments)
     {
-        $builder = new Arguments($arguments);
+        $builder = new ArgumentsCollection($arguments);
 
         $query = $builder->convert();
 
@@ -388,7 +321,7 @@ class Node
         return $query;
     }
 
-    protected function buildNode($name, $arguments = null): Node
+    protected function buildNode($name, $arguments = null): NodeInterface
     {
         $className = __NAMESPACE__ . '\\Entities\\' . ucfirst($name);
 
@@ -419,18 +352,6 @@ class Node
         return $this;
     }
 
-    public function removeVariable(Variable $variable): self
-    {
-        unset($this->variables[$variable->getName()]);
-
-        return $this;
-    }
-
-    public function hasVariables(): bool
-    {
-        return count($this->variables);
-    }
-
     /**
      * @param Fragment $fragment
      *
@@ -445,12 +366,8 @@ class Node
         return '...' . $fragment->getKeyName();
     }
 
-    /**
-     * @return Node
-     */
-    protected function getRootNode(): ?Node
+    protected function getRootNode(): ?RootNodeInterface
     {
-        /** @var Node $parent */
         if (!empty($this->root)) {
             return $this->root;
         }
