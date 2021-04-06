@@ -3,7 +3,6 @@
 
 namespace GraphQL\Parsers;
 
-
 use GraphQL\Contracts\Entities\AliasInterface;
 use GraphQL\Contracts\Entities\FragmentInterface;
 use GraphQL\Contracts\Entities\NodeInterface;
@@ -21,7 +20,7 @@ class NodeParser implements ParserInterface
     public function parse(IsParsableInterface $parsable, bool $singleLine = false): string
     {
         if ($parsable instanceof NodeInterface) {
-            if ($parsable->getArguments()->count()) {
+            if ($parsable->hasArguments()) {
                 $str = $parsable->getName() . '(' . $parsable->getArguments() . ') {' . PHP_EOL;
             } else {
                 $str = $parsable->getName() . ' {' . PHP_EOL;
@@ -35,14 +34,16 @@ class NodeParser implements ParserInterface
             }
 
             if ($parsable->hasFragments()) {
-                $str .= PHP_EOL . implode(
-                    PHP_EOL,
-                    array_map(fn(FragmentInterface $fragment) => $fragment->inline(), $parsable->getFragments())
-                );
+                $str .= PHP_EOL .
+                    implode(
+                        PHP_EOL,
+                        array_map(fn(FragmentInterface $fragment) => $fragment->inline(), $parsable->getFragments())
+                    );
             }
 
             if ($parsable->hasChildren()) {
-                $str .= PHP_EOL . implode(
+                $str .= PHP_EOL .
+                    implode(
                         PHP_EOL,
                         array_map(fn(NodeInterface $node) => $node->parse(), $parsable->getChildren())
                     );

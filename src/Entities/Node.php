@@ -3,7 +3,6 @@
 
 namespace GraphQL\Entities;
 
-
 use GraphQL\Abstracts\NodeAbstract;
 use GraphQL\Contracts\Entities\FragmentInterface;
 use GraphQL\Contracts\Entities\InlineFragmentInterface;
@@ -14,9 +13,21 @@ use GraphQL\Parsers\NodeParser;
 
 class Node extends NodeAbstract
 {
-    public function __construct(string $name, array $arguments = [])
+    /**
+     * Node constructor.
+     * Version 2 will force presenters as args
+     *
+     * @param string $name
+     * @param array  $arguments
+     * @param array  $presenters
+     *
+     * @todo introduce factories
+     * @todo force parsers as args or setter
+     */
+    public function __construct(string $name, array $arguments = [], array $presenters = [])
     {
-        parent::__construct($name, $arguments, []);
+        parent::__construct($name, $arguments, $presenters);
+
         $this->parsers[] = new NodeParser();
     }
 
@@ -41,7 +52,7 @@ class Node extends NodeAbstract
      * @return $this
      * @throws InvalidArgumentTypeException
      */
-    protected function get(array $arguments): self
+    protected function useM(array $arguments): self
     {
         foreach ($arguments as $argument) {
             if ($argument instanceof VariableInterface) {
@@ -49,7 +60,9 @@ class Node extends NodeAbstract
             }
 
             if ($argument instanceof InlineFragmentInterface) {
-                throw new InvalidArgumentTypeException(get_class($argument));
+                $this->on($argument);
+
+                continue;
             }
 
             if ($argument instanceof FragmentInterface) {
@@ -59,7 +72,12 @@ class Node extends NodeAbstract
                 continue;
             }
 
-            $alias = new Alias($argument);
+            if (is_array($argument)) {
+                $alias = new Alias(key($argument), current($argument));
+            } else {
+                $alias = new Alias($argument);
+            }
+
             $this->attributes[$alias->getKey()] = $alias;
         }
 

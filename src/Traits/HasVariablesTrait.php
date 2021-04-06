@@ -1,29 +1,27 @@
 <?php
 
 
-namespace GraphQL\Entities;
+namespace GraphQL\Traits;
 
 
-use GraphQL\Contracts\Entities\RootNodeInterface;
 use GraphQL\Contracts\Entities\VariableInterface;
 use GraphQL\Contracts\Properties\HasVariablesInterface;
-use GraphQL\Parsers\QueryParser;
-use GraphQL\Traits\HasFragmentsTrait;
 
-class Query extends Node implements RootNodeInterface
+trait HasVariablesTrait
 {
     protected array $variables = [];
 
-    public function __construct(string $name, array $arguments = [])
-    {
-        parent::__construct($name, $arguments);
-
-        $this->setParsers([new QueryParser()]);
-    }
-
     final public function removeVariable(VariableInterface $variable): HasVariablesInterface
     {
-        // TODO: Implement removeVariable() method.
+        $match = array_filter(
+            $this->variables,
+            fn(VariableInterface $item) => $item->toString() === $variable->toString(),
+        );
+
+        if (count($match) > 0) {
+            unset($this->variables[key($match)]);
+        }
+
         return $this;
     }
 
@@ -37,7 +35,7 @@ class Query extends Node implements RootNodeInterface
         return count($this->variables) > 0;
     }
 
-    final public function addVariable(VariableInterface $variable): self
+    final public function addVariable(VariableInterface $variable): HasVariablesInterface
     {
         $this->variables[] = $variable;
 

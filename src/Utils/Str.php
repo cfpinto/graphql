@@ -36,7 +36,7 @@ class Str
 
     public static function ugliffy(string $str): string
     {
-        return self::reduceDouble(str_replace(PHP_EOL, ' ', $str));
+        return trim(self::reduceDouble(str_replace(PHP_EOL, ' ', $str)));
     }
 
     public static function reduceDouble(string $str, string $reduce = ' '): string

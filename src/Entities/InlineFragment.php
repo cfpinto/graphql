@@ -16,6 +16,10 @@ class InlineFragment extends Fragment implements InlineFragmentInterface
 
     public function toString(): string
     {
+        if (!$this->hasAttributes()) {
+            return '';
+        }
+
         return '... on ' . $this->getOnType() . ' {' . PHP_EOL
             . implode(PHP_EOL, array_map(
                 fn(IsStringableInterface $item) => $item->toString(),

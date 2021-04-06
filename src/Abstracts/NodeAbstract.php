@@ -7,7 +7,8 @@ namespace GraphQL\Abstracts;
 use GraphQL\Collections\ArgumentsCollection;
 use GraphQL\Contracts\Entities\NodeInterface;
 use GraphQL\Exceptions\InvalidArgumentTypeException;
-use GraphQL\Traits\HasArguments;
+use GraphQL\Traits\HasAliasTrait;
+use GraphQL\Traits\HasArgumentsTrait;
 use GraphQL\Traits\HasAttributesTrait;
 use GraphQL\Traits\HasFragmentsTrait;
 use GraphQL\Traits\HasInlineFragmentsTrait;
@@ -26,8 +27,9 @@ use GraphQL\Traits\IsStringableTrait;
  */
 abstract class NodeAbstract implements NodeInterface
 {
+    use HasAliasTrait;
     use HasAttributesTrait;
-    use HasArguments;
+    use HasArgumentsTrait;
     use HasFragmentsTrait;
     use HasInlineFragmentsTrait;
     use HasNameTrait;
@@ -58,7 +60,7 @@ abstract class NodeAbstract implements NodeInterface
     final public function __call($name, $arguments): NodeInterface
     {
         if ($name === 'use') {
-            return $this->get($arguments);
+            return $this->useM($arguments);
         }
 
         if (!isset($arguments[0]) || !is_array($arguments[0])) {
@@ -90,9 +92,9 @@ abstract class NodeAbstract implements NodeInterface
      * @deprecated
      * @see NodeAbstract::parse()
      */
-    final public function query(): void
+    final public function query(): string
     {
-        echo $this->toString();
+        return $this->toString();
     }
 
     final public function clear(): self
@@ -103,7 +105,7 @@ abstract class NodeAbstract implements NodeInterface
         return $this;
     }
 
-    abstract protected function get(array $arguments): NodeInterface;
+    abstract protected function useM(array $arguments): NodeInterface;
 
     abstract protected function generate(string $name, array $arguments = []): NodeInterface;
 }

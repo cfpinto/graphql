@@ -34,10 +34,6 @@ class Argument implements ArgumentInterface
             return json_encode($this->value);
         }
 
-        if (is_string($this->value)) {
-            return $this->key . ': ' . $this->value;
-        }
-
         return $this->key . ': ' . json_encode($this->value);
     }
 }

@@ -8,20 +8,21 @@ use GraphQL\Contracts\Entities\InlineFragmentInterface;
 use GraphQL\Contracts\Entities\RootNodeInterface;
 use GraphQL\Contracts\Entities\VariableInterface;
 use GraphQL\Contracts\Properties\IsParsableInterface;
-use GraphQL\Actions\Query;
+use GraphQL\Actions\Mutation;
 use GraphQL\Utils\Str;
 
-class QueryParser extends NodeParser
+class MutationParser extends NodeParser
 {
 
     public function can(IsParsableInterface $parsable): bool
     {
-        return ($parsable instanceof Query);
+        return ($parsable instanceof Mutation);
     }
 
     public function parse(IsParsableInterface $parsable, bool $singleLine = false): string
     {
         $str = '';
+
         if ($parsable instanceof RootNodeInterface) {
             if ($parsable->hasFragments()) {
                 foreach ($parsable->getFragments() as $fragment) {
@@ -31,14 +32,17 @@ class QueryParser extends NodeParser
                 }
             }
 
-            $varStr = '';
+            $suffix = '';
             if ($parsable->hasVariables()) {
-                $queryName = 'get' . ucfirst($parsable->getName());
+                $mutationName = ucfirst($parsable->getName()) . 'Mutation';
                 $variables = implode(' ', array_map(fn(VariableInterface $item) => $item->toString(), $parsable->getVariables()));
-                $varStr = PHP_EOL . "query {$queryName}({$variables})";
+                $varStr = PHP_EOL . "mutation {$mutationName}({$variables}) {" . PHP_EOL;
+                $suffix = PHP_EOL . '}';
+            } else {
+                $varStr = 'mutation ';
             }
 
-            $str .= PHP_EOL . Str::ident($varStr . '{' . PHP_EOL . parent::parse($parsable) . PHP_EOL . '}' . PHP_EOL);
+            $str .= PHP_EOL . Str::ident($varStr . parent::parse($parsable)) . $suffix;
         }
 
         if ($singleLine) {

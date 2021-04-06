@@ -18,11 +18,6 @@ class Variable implements VariableInterface
 
     protected ?string $default;
 
-    /**
-     * @var ParserInterface[]
-     */
-    protected array $parsers;
-
     public function __construct(string $name, string $type, string $default = '')
     {
         $this->setName($name);
@@ -68,7 +63,6 @@ class Variable implements VariableInterface
 
     public function toString(): string
     {
-        //TODO: use presenters
         return '$' . $this->getName() . ': ' .
             ($this->getType()) .
             ($this->getDefault() ?

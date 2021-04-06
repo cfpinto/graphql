@@ -3,8 +3,6 @@
 
 namespace GraphQL\Contracts\Properties;
 
-
-use GraphQL\Collections\ArgumentsCollection;
 use GraphQL\Contracts\Collections\StringableCollectionInterface;
 
 interface HasArgumentsInterface
@@ -13,5 +11,7 @@ interface HasArgumentsInterface
 
     public function getArguments(): ?StringableCollectionInterface;
 
-    public function setArguments(ArgumentsCollection $arguments): HasArgumentsInterface;
+    public function setArguments(StringableCollectionInterface $arguments): HasArgumentsInterface;
+
+    public function rootVariables(): void;
 }

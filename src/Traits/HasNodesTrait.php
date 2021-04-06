@@ -25,11 +25,7 @@ trait HasNodesTrait
         $node->setParentNode($this);
 
         if ($node instanceof HasArgumentsInterface && $node->hasArguments()) {
-            foreach ($node->getArguments() as $argument) {
-                if ($argument instanceof VariableInterface) {
-                    $node->root()->addVariable($argument);
-                }
-            }
+            $node->rootVariables();
         }
 
         return $this->children[$key];

@@ -29,7 +29,11 @@ trait HasFragmentsTrait
 
     final public function removeFragment(FragmentInterface $fragment): HasFragmentsInterface
     {
-        // TODO: Implement removeFragment() method.
+        $match = array_filter($this->fragments, fn(FragmentInterface $item) => $item->inline() === $fragment->inline());
+
+        if (count($match) > 0) {
+            unset($this->fragments[key($match)]);
+        }
 
         return $this;
     }

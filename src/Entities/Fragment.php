@@ -3,8 +3,6 @@
 
 namespace GraphQL\Entities;
 
-
-use GraphQL\Collections\ArgumentsCollection;
 use GraphQL\Contracts\Entities\FragmentInterface;
 use GraphQL\Contracts\Entities\InlineFragmentInterface;
 use GraphQL\Contracts\Entities\VariableInterface;

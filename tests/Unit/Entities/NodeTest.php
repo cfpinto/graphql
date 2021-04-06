@@ -1,0 +1,124 @@
+<?php
+
+namespace Tests\Unit\Entities;
+
+use GraphQL\Actions\Query;
+use GraphQL\Collections\ArgumentsCollection;
+use GraphQL\Contracts\Entities\NodeInterface;
+use GraphQL\Contracts\Properties\HasAliasInterface;
+use GraphQL\Contracts\Properties\HasArgumentsInterface;
+use GraphQL\Contracts\Properties\HasAttributesInterface;
+use GraphQL\Contracts\Properties\HasFragmentsInterface;
+use GraphQL\Contracts\Properties\HasInlineFragmentsInterface;
+use GraphQL\Contracts\Properties\HasNameInterface;
+use GraphQL\Contracts\Properties\HasNodesInterface;
+use GraphQL\Contracts\Properties\HasParentInterface;
+use GraphQL\Contracts\Properties\IsParsableInterface;
+use GraphQL\Contracts\Properties\IsStringableInterface;
+use GraphQL\Entities\Fragment;
+use GraphQL\Entities\Node;
+use GraphQL\Entities\Variable;
+use GraphQL\Exceptions\InvalidTypeOperationException;
+use GraphQL\Utils\Str;
+use PHPUnit\Framework\TestCase;
+
+class NodeTest extends TestCase
+{
+    public function testInterfaces()
+    {
+        $node = new Node('foo');
+
+        $this->assertInstanceOf(NodeInterface::class, $node);
+        $this->assertInstanceOf(HasAliasInterface::class, $node);
+        $this->assertInstanceOf(HasArgumentsInterface::class, $node);
+        $this->assertInstanceOf(HasAttributesInterface::class, $node);
+        $this->assertInstanceOf(HasFragmentsInterface::class, $node);
+        $this->assertInstanceOf(HasInlineFragmentsInterface::class, $node);
+        $this->assertInstanceOf(HasNameInterface::class, $node);
+        $this->assertInstanceOf(HasNodesInterface::class, $node);
+        $this->assertInstanceOf(HasParentInterface::class, $node);
+        $this->assertInstanceOf(IsParsableInterface::class, $node);
+        $this->assertInstanceOf(IsStringableInterface::class, $node);
+    }
+
+    public function testAlias()
+    {
+        $node = new Node('foo');
+        $this->assertEquals('foo', $node->getName());
+        $node->alias('bar');
+        $this->assertEquals('bar: foo', $node->getName());
+    }
+
+    public function testArguments()
+    {
+        $query = new Query('foo');
+        $node = new Node('foo', ['bar' => true]);
+        $query->addChild('foo', $node);
+        $this->assertTrue($node->hasArguments());
+        $this->assertCount(1, $node->getArguments());
+        $node->setArguments(new ArgumentsCollection(['bar' => true, 'foo' => new Variable('var', 'String')]));
+        $this->assertTrue($node->hasArguments());
+        $this->assertCount(2, $node->getArguments());
+        $this->assertCount(1, $query->getVariables());
+        $this->assertEquals('foo(bar: true var: $var) { }', Str::ugliffy($node->toString()));
+        $this->assertEquals(
+            'query getFoo($var: String){ foo { foo(bar: true var: $var) { } } }',
+            Str::ugliffy($query->toString())
+        );
+    }
+
+    public function testAttributes()
+    {
+        $node = new Node('foo');
+        $node->use('name');
+        $this->assertTrue($node->hasAttributes());
+        $this->assertCount(1, $node->getAttributes());
+        $this->assertEquals('foo { name }', Str::ugliffy($node->toString()));
+    }
+
+    public function testFragments()
+    {
+        $fragment = new Fragment('bar', 'BAR');
+        $node = new Node('foo');
+        $node->addFragment($fragment);
+        $this->assertTrue($node->hasFragments());
+        $this->assertCount(1, $node->getFragments());
+        $this->assertEquals('foo { ...bar }', Str::ugliffy($node->toString()));
+        $node->removeFragment($fragment);
+        $this->assertFalse($node->hasFragments());
+        $this->assertEquals('foo { }', Str::ugliffy($node->toString()));
+        $node->on('foo')->use('bar');
+        $this->assertEquals('foo { ... on foo { bar } }', Str::ugliffy($node->toString()));
+    }
+
+    public function testRelations()
+    {
+        $node = new Node('foo');
+        $child = new Node('bar');
+        $parent = new Node('parent');
+        $root = new Query('root');
+        $node->addChild('bar', $child);
+        $this->assertTrue($node->hasChildren());
+        $this->assertCount(1, $node->getChildren());
+        $node->removeChild('bar');
+        $this->assertFalse($node->hasChildren());
+        $this->expectException(InvalidTypeOperationException::class);
+        $node->removeChild('bar2');
+        $node->setParentNode($parent);
+        $root->addChild('parent', $parent);
+        $this->assertEquals($parent, $node->prev());
+        $this->assertEquals($parent, $node->getParentNode());
+        $this->assertEquals($root, $node->root());
+        $this->assertEquals($root, $node->getRootNode());
+    }
+
+    public function testParsability()
+    {
+        $node = new Node('foo');
+        $this->assertEquals('foo { }', Str::ugliffy($node->parse()));
+        $node->use('uuid', 'name');
+        $this->assertEquals('foo { uuid name }', Str::ugliffy($node->parse()));
+        $node->on('bar')->use('catch');
+        $this->assertEquals('foo { uuid name ... on bar { catch } }', Str::ugliffy($node->parse()));
+    }
+}
