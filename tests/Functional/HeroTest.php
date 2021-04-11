@@ -17,22 +17,22 @@ class HeroTest extends TestCase
         $hero = new Query('hero', ['id' => '1']);
         $this->assertInstanceOf(Node::class, $hero);
         $hero->use('name', 'id');
-        $this->assertEquals('{ hero(id: "1") { name id } }', Str::ugliffy($hero->toString()));
+        $this->assertEquals('{ hero(id: "1") { name id }}', Str::ugliffy($hero->toString()));
         $friends = $hero->friends(['first' => 1])->use('name');
         $this->assertEquals(
-            '{ hero(id: "1") { name id friends(first: 1) { name } } }',
+            '{ hero(id: "1") { name id friends(first: 1) { name }}}',
             Str::ugliffy($hero->toString())
         );
         $parent = $friends->prev();
         $this->assertEquals($parent, $hero);
         $costumes = $parent->costumes->use('colour')->alias('color', 'colour');
         $this->assertEquals(
-            '{ hero(id: "1") { name id friends(first: 1) { name } costumes { color: colour } } }',
+            '{ hero(id: "1") { name id friends(first: 1) { name } costumes { color: colour }}}',
             Str::ugliffy($hero->toString())
         );
         $costumes->alias('cosplay');
         $this->assertEquals(
-            '{ hero(id: "1") { name id friends(first: 1) { name } cosplay: costumes { color: colour } } }',
+            '{ hero(id: "1") { name id friends(first: 1) { name } cosplay: costumes { color: colour }}}',
             Str::ugliffy($hero->toString())
         );
     }
@@ -47,7 +47,7 @@ class HeroTest extends TestCase
             ->use('color');
 
         $this->assertEquals(
-            'mutation changeHeroCostumeColor(id: "theHeroId" color: "red") { hero { name costumes { color } } }',
+            'mutation changeHeroCostumeColor(id: "theHeroId" color: "red") { hero { name costumes { color }}}',
             Str::ugliffy($mutation->toString())
         );
     }

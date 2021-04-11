@@ -60,9 +60,9 @@ class NodeTest extends TestCase
         $this->assertTrue($node->hasArguments());
         $this->assertCount(2, $node->getArguments());
         $this->assertCount(1, $query->getVariables());
-        $this->assertEquals('foo(bar: true var: $var) { }', Str::ugliffy($node->toString()));
+        $this->assertEquals('foo(bar: true var: $var) {}', Str::ugliffy($node->toString()));
         $this->assertEquals(
-            'query getFoo($var: String){ foo { foo(bar: true var: $var) { } } }',
+            'query getFoo($var: String){ foo { foo(bar: true var: $var) {}}}',
             Str::ugliffy($query->toString())
         );
     }
@@ -86,9 +86,9 @@ class NodeTest extends TestCase
         $this->assertEquals('foo { ...bar }', Str::ugliffy($node->toString()));
         $node->removeFragment($fragment);
         $this->assertFalse($node->hasFragments());
-        $this->assertEquals('foo { }', Str::ugliffy($node->toString()));
+        $this->assertEquals('foo {}', Str::ugliffy($node->toString()));
         $node->on('foo')->use('bar');
-        $this->assertEquals('foo { ... on foo { bar } }', Str::ugliffy($node->toString()));
+        $this->assertEquals('foo { ... on foo { bar }}', Str::ugliffy($node->toString()));
     }
 
     public function testRelations()
@@ -115,10 +115,10 @@ class NodeTest extends TestCase
     public function testParsability()
     {
         $node = new Node('foo');
-        $this->assertEquals('foo { }', Str::ugliffy($node->parse()));
+        $this->assertEquals('foo {}', Str::ugliffy($node->parse()));
         $node->use('uuid', 'name');
         $this->assertEquals('foo { uuid name }', Str::ugliffy($node->parse()));
         $node->on('bar')->use('catch');
-        $this->assertEquals('foo { uuid name ... on bar { catch } }', Str::ugliffy($node->parse()));
+        $this->assertEquals('foo { uuid name ... on bar { catch }}', Str::ugliffy($node->parse()));
     }
 }

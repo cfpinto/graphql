@@ -37,6 +37,13 @@ trait HasVariablesTrait
 
     final public function addVariable(VariableInterface $variable): HasVariablesInterface
     {
+        /** @var VariableInterface $var */
+        foreach ($this->variables as $var) {
+            if ($variable->getName() === $var->getName()) {
+                return $this;
+            }
+        }
+
         $this->variables[] = $variable;
 
         return $this;

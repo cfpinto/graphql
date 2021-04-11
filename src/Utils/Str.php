@@ -36,11 +36,18 @@ class Str
 
     public static function ugliffy(string $str): string
     {
-        return trim(self::reduceDouble(str_replace(PHP_EOL, ' ', $str)));
+        return trim(
+            self::stripSpaces(self::reduceDouble(str_replace(PHP_EOL, ' ', $str)))
+        );
     }
 
     public static function reduceDouble(string $str, string $reduce = ' '): string
     {
         return preg_replace('#' . preg_quote($reduce, '#') . '{2,}#', $reduce, $str);
+    }
+
+    public static function stripSpaces(string $str): string
+    {
+        return preg_replace('/(?<=({|}))(\s+)(?=})/', '', $str);
     }
 }

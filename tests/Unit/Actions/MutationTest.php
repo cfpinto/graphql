@@ -18,16 +18,16 @@ class MutationTest extends TestCase
         $this->assertInstanceOf(RootNodeInterface::class, $mutation);
     }
 
-    public function testQuery()
+    public function testMutation()
     {
         $mutation = new Mutation('fooBar', ['id' => 1, 'name' => 'bar']);
-        $this->assertEquals('mutation fooBar(id: 1 name: "bar") { }', Str::ugliffy($mutation->toString()));
+        $this->assertEquals('mutation fooBar(id: 1 name: "bar") {}', Str::ugliffy($mutation->toString()));
         $mutation->use('id', 'name');
         $this->assertEquals('mutation fooBar(id: 1 name: "bar") { id name }', Str::ugliffy($mutation->toString()));
-        $mutation = new Mutation('fooBar2', ['name' => 'foo', 'test' => new Variable('bar', 'Str')]);
+        $mutation = new Mutation('fooBar2', ['name' => 'foo', 'test' => new Variable('bar', 'String')]);
         $mutation->use('id', 'name');
         $this->assertEquals(
-            'mutation FooBar2Mutation($bar: Str) { fooBar2(name: "foo" bar: $bar) { id name } }',
+            'mutation FooBar2Mutation($bar: String) { fooBar2(name: "foo" bar: $bar) { id name }}',
             Str::ugliffy($mutation->toString())
         );
     }

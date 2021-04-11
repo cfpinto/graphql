@@ -27,7 +27,5 @@ class Mutation extends Node implements RootNodeInterface
         parent::__construct($name, $arguments);
 
         $this->setParsers([new MutationParser()]);
-
-        $this->rootVariables();
     }
 }
