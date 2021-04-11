@@ -6,13 +6,13 @@
  * Time: 15:05
  */
 
-namespace GraphQL;
+namespace GraphQL\Exceptions;
 
 /**
  * Class Exception
  * @package GraphQL
  */
-class Exception extends \Exception
+class InvalidMethodException extends \Exception
 {
 
 }

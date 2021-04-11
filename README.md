@@ -1,14 +1,24 @@
 # graphql
 A simple yet powerful GraphQL query builder
 
+## Change log
+
+A lot of rewriting was done on this version particularly at code organization and entity management.
+Whit this level of rewriting keeping backwards compatibility is tricky but did my best to do so.
+
+There are a few deprecation notices that will be dropped next version:
+- Root level classes will be dropped in favour of context namespace (GraphQL\Mutation => GraphQL\Actions\Mutation)
+- Parsers and Entities will be decoupled, you will be forced to inject Parsers in the Entities constructor
+- The `on()` method is used as syntax sugar, might be deprecated in favour of passing InlineFragment instances in the use method   
+
 ## How it works?
 
 Writing GraphQL queries can be a painful process. With GraphpQL query builder write PHP and get GraphQL
 
 ### Examples
 
-When finding an Hero to be his sidekick one finds himself overwhelmed with the number of Heros out there.
-There are all sort of Heros so lets list them all
+When finding a Hero to be his sidekick, one finds himself overwhelmed with the number of Heroes out there.
+There are all sort of Heroes so lets list them all
 
 #### Fields
 
