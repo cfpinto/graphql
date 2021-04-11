@@ -24,6 +24,16 @@ class Argument implements ArgumentInterface
         $this->value = $value;
     }
 
+    public function getKey(): ?string
+    {
+        return $this->key;
+    }
+
+    public function getValue()
+    {
+        return $this->value;
+    }
+
     public function toString(): string
     {
         if (is_numeric($this->key) || empty($this->key)) {

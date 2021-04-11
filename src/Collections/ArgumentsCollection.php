@@ -10,11 +10,9 @@ namespace GraphQL\Collections;
 
 use GraphQL\Abstracts\CollectionAbstract;
 use GraphQL\Contracts\Entities\ArgumentInterface;
-use GraphQL\Contracts\Entities\FragmentInterface;
 use GraphQL\Contracts\Entities\VariableInterface;
 use GraphQL\Contracts\Properties\HasVariablesInterface;
 use GraphQL\Entities\Argument;
-use GraphQL\Entities\Variable;
 use GraphQL\Exceptions\InvalidArgumentTypeException;
 
 class ArgumentsCollection extends CollectionAbstract
@@ -31,20 +29,21 @@ class ArgumentsCollection extends CollectionAbstract
     }
 
     /**
-     * @return Variable[]
+     * @return VariableInterface[]
      */
     public function getVariables(): array
     {
         return array_filter($this->elements, fn($item) => $item instanceof VariableInterface);
     }
 
-    public function toString(): string
-    {
-        return rtrim($this->stringify($this->elements), ', ');
-    }
-
     public function removeVariable(VariableInterface $variable): self
     {
+        foreach ($this->elements as $key => $value) {
+            if ($value instanceof VariableInterface && $value->toString() === $variable->toString()) {
+                unset($this->elements[$key]);
+            }
+        }
+
         return $this;
     }
 
@@ -55,9 +54,58 @@ class ArgumentsCollection extends CollectionAbstract
 
     public function addVariable(VariableInterface $variable): self
     {
+        foreach ($this->elements as $key => $value) {
+            if ($value instanceof VariableInterface && $value->getName() === $variable->getName()) {
+                unset($this->elements[$key]);
+                break;
+            }
+        }
+
         $this->elements[] = $variable;
 
         return $this;
+    }
+
+    /**
+     * @return ArgumentInterface[]
+     */
+    public function getArguments(): array
+    {
+        return array_filter($this->elements, fn($item) => $item instanceof ArgumentInterface);
+    }
+
+    public function removeArgument(ArgumentInterface $argument): self
+    {
+        foreach ($this->elements as $key => $value) {
+            if ($value instanceof ArgumentInterface && $value->toString() == $argument->toString()) {
+                unset($this->elements[$key]);
+            }
+        }
+
+        return $this;
+    }
+
+    public function hasArguments(): bool
+    {
+        return count($this->getArguments()) > 0;
+    }
+
+    public function addArgument(ArgumentInterface $argument): self
+    {
+        foreach ($this->elements as $key => $value) {
+            if ($value instanceof ArgumentInterface && $value->toString() === $argument->toString()) {
+                return $this;
+            }
+        }
+
+        $this->elements[] = $argument;
+
+        return $this;
+    }
+
+    public function toString(): string
+    {
+        return rtrim($this->stringify($this->elements), ', ');
     }
 
     /**
