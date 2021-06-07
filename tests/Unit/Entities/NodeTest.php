@@ -43,10 +43,13 @@ class NodeTest extends TestCase
 
     public function testAlias()
     {
+        $parent = new Query('root');
         $node = new Node('foo');
+        $parent->addChild('foo', $node);
         $this->assertEquals('foo', $node->getName());
         $node->alias('bar');
         $this->assertEquals('bar: foo', $node->getName());
+
     }
 
     public function testArguments()
