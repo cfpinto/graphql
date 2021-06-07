@@ -6,6 +6,7 @@ namespace GraphQL\Traits;
 
 use GraphQL\Contracts\Entities\AliasInterface;
 use GraphQL\Contracts\Properties\HasAliasInterface;
+use GraphQL\Contracts\Properties\HasParentInterface;
 use GraphQL\Entities\Alias;
 
 trait HasAliasTrait
@@ -14,10 +15,16 @@ trait HasAliasTrait
     {
         if (is_null($who)) {
             $name = $this->getName();
+            $oldKey = (string)$name;
             if ($name instanceof AliasInterface) {
                 $name->setAlias($alias);
             } else {
                 $name = new Alias($name, $alias);
+            }
+
+            if ($this instanceof HasParentInterface && $this->getParentNode()) {
+                $this->getParentNode()
+                    ->reindexChild($oldKey, (string)$name);
             }
 
             $this->setName($name);

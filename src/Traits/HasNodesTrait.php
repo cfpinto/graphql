@@ -46,4 +46,10 @@ trait HasNodesTrait
 
         return $this;
     }
+
+    final public function reindexChild(string $oldKey, string $newKey): void
+    {
+        $this->children[$newKey] = $this->children[$oldKey];
+        unset($this->children[$oldKey]);
+    }
 }

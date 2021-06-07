@@ -18,4 +18,6 @@ interface HasNodesInterface
     public function hasChildren(): bool;
 
     public function removeChild(string $key): HasNodesInterface;
+
+    public function reindexChild(string $oldKey, string $newKey): void;
 }
