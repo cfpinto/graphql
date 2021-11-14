@@ -26,7 +26,7 @@ class QueryParser extends NodeParser
             if ($parsable->hasFragments()) {
                 foreach ($parsable->getFragments() as $fragment) {
                     if (!$fragment instanceof InlineFragmentInterface) {
-                        $str .= Str::ident($fragment->toString());
+                        $str .= $this->strHelper->ident($fragment->toString());
                     }
                 }
             }
@@ -34,15 +34,23 @@ class QueryParser extends NodeParser
             $varStr = '';
             if ($parsable->hasVariables()) {
                 $queryName = 'get' . ucfirst($parsable->getName());
-                $variables = implode(' ', array_map(fn(VariableInterface $item) => $item->toString(), $parsable->getVariables()));
+                $variables = implode(
+                    ' ',
+                    array_map(
+                        fn(VariableInterface $item) => $item->toString(),
+                        $parsable->getVariables()
+                    )
+                );
                 $varStr = PHP_EOL . "query {$queryName}({$variables})";
             }
 
-            $str .= PHP_EOL . Str::ident($varStr . '{' . PHP_EOL . parent::parse($parsable) . PHP_EOL . '}' . PHP_EOL);
+            $str .= PHP_EOL . $this->strHelper->ident(
+                    $varStr . '{' . PHP_EOL . parent::parse($parsable) . PHP_EOL . '}' . PHP_EOL
+                );
         }
 
         if ($singleLine) {
-            return Str::ugliffy($str);
+            return $this->strHelper->ugliffy($str);
         }
 
         return $str;
