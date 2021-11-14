@@ -70,11 +70,9 @@ class Node extends NodeAbstract
                 continue;
             }
 
-            if (is_array($argument)) {
-                $alias = new Alias(key($argument), current($argument));
-            } else {
-                $alias = new Alias($argument);
-            }
+            $alias = is_array($argument) ?
+                new Alias(key($argument), current($argument)):
+                new Alias($argument);
 
             $this->attributes[$alias->getKey()] = $alias;
         }

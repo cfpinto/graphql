@@ -16,6 +16,7 @@ trait HasAliasTrait
         if ($who === null) {
             $name = $this->getName();
             $oldKey = (string)$name;
+
             if ($name instanceof AliasInterface) {
                 $name->setAlias($alias);
             } else {

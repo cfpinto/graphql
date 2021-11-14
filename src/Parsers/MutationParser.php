@@ -32,6 +32,8 @@ class MutationParser extends NodeParser
             }
 
             $suffix = '';
+            $varStr = 'mutation ';
+
             if ($parsable->hasVariables()) {
                 $mutationName = ucfirst($parsable->getName()) . 'Mutation';
                 $variables = implode(
@@ -43,8 +45,6 @@ class MutationParser extends NodeParser
                 );
                 $varStr = PHP_EOL . "mutation {$mutationName}({$variables}) {" . PHP_EOL;
                 $suffix = PHP_EOL . '}';
-            } else {
-                $varStr = 'mutation ';
             }
 
             $str .= PHP_EOL . $this->strHelper->ident($varStr . parent::parse($parsable)) . $suffix;
