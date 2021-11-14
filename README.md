@@ -1,5 +1,8 @@
 # graphql
 A simple yet powerful GraphQL query builder
+[![CircleCI](https://circleci.com/gh/cfpinto/graphql/tree/master.svg?style=svg)](https://circleci.com/gh/cfpinto/graphql/tree/master)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/fce20e3c3a194a77aca585e68fd48fc1)](https://www.codacy.com/gh/cfpinto/graphql/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cfpinto/graphql&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/fce20e3c3a194a77aca585e68fd48fc1)](https://www.codacy.com/gh/cfpinto/graphql/dashboard?utm_source=github.com&utm_medium=referral&utm_content=cfpinto/graphql&utm_campaign=Badge_Coverage)
 
 ## Change log
 
@@ -7,11 +10,11 @@ A lot of rewriting was done on this version particularly at code organization an
 Whit this level of rewriting keeping backwards compatibility is tricky but did my best to do so.
 
 There are a few deprecation notices that will be dropped next version:
-- Root level classes will be dropped in favour of context namespace (GraphQL\Mutation => GraphQL\Actions\Mutation)
-- Parsers and Entities will be decoupled, you will be forced to inject Parsers in the Entities constructor
-- The `on()` method is used as syntax sugar, might be deprecated in favour of passing InlineFragment instances in the use method   
+  - Root level classes will be dropped in favour of context namespace (GraphQL\Mutation => GraphQL\Actions\Mutation)
+  - Parsers and Entities will be decoupled, you will be forced to inject Parsers in the Entities constructor
+  - The `on()` method is used as syntax sugar, might be deprecated in favour of passing InlineFragment instances in the use method   
 
-## How it works?
+## How it works
 
 Writing GraphQL queries can be a painful process. With GraphpQL query builder write PHP and get GraphQL
 
@@ -304,8 +307,7 @@ mutation ChangeHeroCostumeColorMutation($uuid: String, $color: String) {
 }
 ```
 
-## Support on Beerpay
-Hey dude! Help me out for a couple of :beers:!
+## Build Status
 
 [![CircleCI](https://circleci.com/gh/cfpinto/graphql/tree/master.svg?style=svg)](https://circleci.com/gh/cfpinto/graphql/tree/master)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/fce20e3c3a194a77aca585e68fd48fc1)](https://www.codacy.com/gh/cfpinto/graphql/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cfpinto/graphql&amp;utm_campaign=Badge_Grade)
