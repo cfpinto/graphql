@@ -9,6 +9,14 @@ use GraphQL\Utils\Str;
 use PHPUnit\Framework\TestCase;
 
 class QueryTest extends TestCase {
+    private Str $str;
+
+    public function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this->str = new Str();
+    }
+
 
     public function testInterfaces()
     {
@@ -19,13 +27,13 @@ class QueryTest extends TestCase {
     public function testQuery()
     {
         $query = new Query('foo');
-        $this->assertEquals('{ foo {}}', Str::ugliffy($query->toString()));
+        $this->assertEquals('{ foo {}}', $this->str->ugliffy($query->toString()));
         $query->use('id', 'name');
-        $this->assertEquals('{ foo { id name }}', Str::ugliffy($query->toString()));
+        $this->assertEquals('{ foo { id name }}', $this->str->ugliffy($query->toString()));
         $query->allies(['name' => new Variable('name', 'String')]);
         $this->assertEquals(
             'query getFoo($name: String){ foo { id name allies(name: $name) {}}}',
-            Str::ugliffy($query->toString())
+            $this->str->ugliffy($query->toString())
         );
     }
 

@@ -18,6 +18,14 @@ use PHPUnit\Framework\TestCase;
 
 class FragmentTest extends TestCase
 {
+    private Str $str;
+
+    public function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this->str = new Str();
+    }
+
     public function testInterfaces()
     {
         $fragment = new Fragment('foo', 'bar');
@@ -89,7 +97,7 @@ class FragmentTest extends TestCase
         $fragment = new Fragment('foo', 'Bar');
         $this->assertEquals('', $fragment->toString());
         $fragment->use('name');
-        $this->assertEquals('fragment foo on Bar { name }', Str::ugliffy($fragment->toString()));
+        $this->assertEquals('fragment foo on Bar { name }', $this->str->ugliffy($fragment->toString()));
         $this->assertEquals('...foo', $fragment->inline());
     }
 }

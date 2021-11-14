@@ -9,7 +9,7 @@ class Str
     const TAB = 4;
     const IDENT_CHAR = ' ';
 
-    public static function ident(string $str): string
+    public function ident(string $str): string
     {
         $lines = explode(PHP_EOL, $str);
         $level = 0;
@@ -34,19 +34,19 @@ class Str
         return $str;
     }
 
-    public static function ugliffy(string $str): string
+    public function ugliffy(string $str, $apply = true): string
     {
-        return trim(
-            self::stripSpaces(self::reduceDouble(str_replace(PHP_EOL, ' ', $str)))
-        );
+        return $apply ?
+            trim($this->stripSpaces($this->reduceDouble(str_replace(PHP_EOL, ' ', $str)))) :
+            $str;
     }
 
-    public static function reduceDouble(string $str, string $reduce = ' '): string
+    public function reduceDouble(string $str, string $reduce = ' '): string
     {
         return preg_replace('#' . preg_quote($reduce, '#') . '{2,}#', $reduce, $str);
     }
 
-    public static function stripSpaces(string $str): string
+    public function stripSpaces(string $str): string
     {
         return preg_replace('/(?<=({|}))(\s+)(?=})/', '', $str);
     }

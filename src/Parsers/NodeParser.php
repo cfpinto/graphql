@@ -8,9 +8,17 @@ use GraphQL\Contracts\Entities\FragmentInterface;
 use GraphQL\Contracts\Entities\NodeInterface;
 use GraphQL\Contracts\Parsers\ParserInterface;
 use GraphQL\Contracts\Properties\IsParsableInterface;
+use GraphQL\Utils\Str;
 
 class NodeParser implements ParserInterface
 {
+
+    protected Str $strHelper;
+
+    public function __construct()
+    {
+        $this->strHelper = new Str();
+    }
 
     public function can(IsParsableInterface $parsable): bool
     {
@@ -20,11 +28,14 @@ class NodeParser implements ParserInterface
     public function parse(IsParsableInterface $parsable, bool $singleLine = false): string
     {
         return $parsable instanceof NodeInterface ?
-            $this->parseArguments($parsable)
-            . $this->parseAttributes($parsable)
-            . $this->parseFragments($parsable)
-            . $this->parseChildren($parsable)
-            . PHP_EOL . '}' . PHP_EOL :
+            $this->strHelper->ugliffy(
+                $this->parseArguments($parsable)
+                . $this->parseAttributes($parsable)
+                . $this->parseFragments($parsable)
+                . $this->parseChildren($parsable)
+                . PHP_EOL . '}' . PHP_EOL,
+                !$singleLine
+            ) :
             '';
     }
 

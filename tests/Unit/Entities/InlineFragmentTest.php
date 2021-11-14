@@ -19,6 +19,14 @@ use PHPUnit\Framework\TestCase;
 
 class InlineFragmentTest extends TestCase
 {
+    private Str $str;
+
+    public function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this->str = new Str();
+    }
+
     public function testInterfaces()
     {
         $fragment = new InlineFragment('foo');
@@ -91,7 +99,7 @@ class InlineFragmentTest extends TestCase
         $fragment = new InlineFragment('foo', 'Bar');
         $this->assertEquals('', $fragment->toString());
         $fragment->use('name');
-        $this->assertEquals('... on foo { name }', Str::ugliffy($fragment->toString()));
-        $this->assertEquals('... on foo { name }', Str::ugliffy($fragment->inline()));
+        $this->assertEquals('... on foo { name }', $this->str->ugliffy($fragment->toString()));
+        $this->assertEquals('... on foo { name }', $this->str->ugliffy($fragment->inline()));
     }
 }

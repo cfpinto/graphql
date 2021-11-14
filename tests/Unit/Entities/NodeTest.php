@@ -24,6 +24,14 @@ use PHPUnit\Framework\TestCase;
 
 class NodeTest extends TestCase
 {
+    private Str $str;
+
+    public function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this->str = new Str();
+    }
+
     public function testInterfaces()
     {
         $node = new Node('foo');
@@ -63,10 +71,10 @@ class NodeTest extends TestCase
         $this->assertTrue($node->hasArguments());
         $this->assertCount(2, $node->getArguments());
         $this->assertCount(1, $query->getVariables());
-        $this->assertEquals('foo(bar: true var: $var) {}', Str::ugliffy($node->toString()));
+        $this->assertEquals('foo(bar: true var: $var) {}', $this->str->ugliffy($node->toString()));
         $this->assertEquals(
             'query getFoo($var: String){ foo { foo(bar: true var: $var) {}}}',
-            Str::ugliffy($query->toString())
+            $this->str->ugliffy($query->toString())
         );
     }
 
@@ -76,7 +84,7 @@ class NodeTest extends TestCase
         $node->use('name');
         $this->assertTrue($node->hasAttributes());
         $this->assertCount(1, $node->getAttributes());
-        $this->assertEquals('foo { name }', Str::ugliffy($node->toString()));
+        $this->assertEquals('foo { name }', $this->str->ugliffy($node->toString()));
     }
 
     public function testFragments()
@@ -86,12 +94,12 @@ class NodeTest extends TestCase
         $node->addFragment($fragment);
         $this->assertTrue($node->hasFragments());
         $this->assertCount(1, $node->getFragments());
-        $this->assertEquals('foo { ...bar }', Str::ugliffy($node->toString()));
+        $this->assertEquals('foo { ...bar }', $this->str->ugliffy($node->toString()));
         $node->removeFragment($fragment);
         $this->assertFalse($node->hasFragments());
-        $this->assertEquals('foo {}', Str::ugliffy($node->toString()));
+        $this->assertEquals('foo {}', $this->str->ugliffy($node->toString()));
         $node->on('foo')->use('bar');
-        $this->assertEquals('foo { ... on foo { bar }}', Str::ugliffy($node->toString()));
+        $this->assertEquals('foo { ... on foo { bar }}', $this->str->ugliffy($node->toString()));
     }
 
     public function testRelations()
@@ -118,10 +126,10 @@ class NodeTest extends TestCase
     public function testParsability()
     {
         $node = new Node('foo');
-        $this->assertEquals('foo {}', Str::ugliffy($node->parse()));
+        $this->assertEquals('foo {}', $this->str->ugliffy($node->parse()));
         $node->use('uuid', 'name');
-        $this->assertEquals('foo { uuid name }', Str::ugliffy($node->parse()));
+        $this->assertEquals('foo { uuid name }', $this->str->ugliffy($node->parse()));
         $node->on('bar')->use('catch');
-        $this->assertEquals('foo { uuid name ... on bar { catch }}', Str::ugliffy($node->parse()));
+        $this->assertEquals('foo { uuid name ... on bar { catch }}', $this->str->ugliffy($node->parse()));
     }
 }
