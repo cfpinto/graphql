@@ -33,17 +33,15 @@ class Node extends NodeAbstract
 
     protected function generate(string $name, array $arguments = []): NodeInterface
     {
-        $keyName = $name;
         $className = __NAMESPACE__ . '\\' .
             str_replace('_', '', ucwords($name, '_'));
 
-        if (class_exists($className)) {
-            $node = new $className($name, $arguments);
-        } else {
-            $node = new Node($name, $arguments);
-        }
-
-        return $this->addChild($keyName, $node);
+        return $this->addChild(
+            $name,
+            class_exists($className) ?
+                new $className($name, $arguments):
+                new Node($name, $arguments)
+        );
     }
 
     /**

@@ -10,8 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 class QueryTest extends TestCase {
 
-    private Query $q;
-    
     public function testInterfaces()
     {
         $query = new Query('foo');

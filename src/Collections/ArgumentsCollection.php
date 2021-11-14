@@ -92,8 +92,8 @@ class ArgumentsCollection extends CollectionAbstract
 
     public function addArgument(ArgumentInterface $argument): self
     {
-        foreach ($this->elements as $key => $value) {
-            if ($value instanceof ArgumentInterface && $value->toString() === $argument->toString()) {
+        foreach ($this->elements as $element) {
+            if ($element instanceof ArgumentInterface && $element->toString() === $argument->toString()) {
                 return $this;
             }
         }
@@ -110,12 +110,11 @@ class ArgumentsCollection extends CollectionAbstract
 
     /**
      * @param array|int|float|string|VariableInterface|ArgumentInterface $input
-     * @param string|null                                                $key ;
      *
      * @return string
      * @throws InvalidArgumentTypeException
      */
-    private function stringify($input, ?string $key = null): string
+    private function stringify($input): string
     {
         if (!is_scalar($input) && !is_array($input)
             && !($input instanceof VariableInterface)
@@ -135,7 +134,7 @@ class ArgumentsCollection extends CollectionAbstract
         if (is_array($input)) {
             return implode(
                 ' ',
-                array_map(fn($loopKey) => $this->stringify($input[$loopKey], $loopKey), array_keys($input)),
+                array_map(fn($loopKey) => $this->stringify($input[$loopKey]), array_keys($input)),
             );
         }
 
