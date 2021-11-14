@@ -19,39 +19,48 @@ class NodeParser implements ParserInterface
 
     public function parse(IsParsableInterface $parsable, bool $singleLine = false): string
     {
-        if ($parsable instanceof NodeInterface) {
-            if ($parsable->hasArguments()) {
-                $str = $parsable->getName() . '(' . $parsable->getArguments() . ') {' . PHP_EOL;
-            } else {
-                $str = $parsable->getName() . ' {' . PHP_EOL;
-            }
+        return $parsable instanceof NodeInterface ?
+            $this->parseArguments($parsable)
+            . $this->parseAttributes($parsable)
+            . $this->parseFragments($parsable)
+            . $this->parseChildren($parsable)
+            . PHP_EOL . '}' . PHP_EOL :
+            '';
+    }
 
-            if ($parsable->hasAttributes()) {
-                $str .= implode(
-                    PHP_EOL,
-                    array_map(fn(AliasInterface $alias) => $alias->toString(), $parsable->getAttributes())
-                );
-            }
+    protected function parseArguments(NodeInterface $parsable): string
+    {
+        return $parsable->hasArguments() ?
+            $parsable->getName() . '(' . $parsable->getArguments() . ') {' . PHP_EOL :
+            $parsable->getName() . ' {' . PHP_EOL;
+    }
 
-            if ($parsable->hasFragments()) {
-                $str .= PHP_EOL .
-                    implode(
-                        PHP_EOL,
-                        array_map(fn(FragmentInterface $fragment) => $fragment->inline(), $parsable->getFragments())
-                    );
-            }
+    protected function parseAttributes(NodeInterface $parsable): string
+    {
+        return $parsable->hasAttributes() ?
+            implode(
+                PHP_EOL,
+                array_map(fn(AliasInterface $alias) => $alias->toString(), $parsable->getAttributes())
+            ) :
+            '';
+    }
 
-            if ($parsable->hasChildren()) {
-                $str .= PHP_EOL .
-                    implode(
-                        PHP_EOL,
-                        array_map(fn(NodeInterface $node) => $node->parse(), $parsable->getChildren())
-                    );
-            }
+    protected function parseFragments(NodeInterface $parsable): string
+    {
+        return $parsable->hasFragments() ?
+            PHP_EOL . implode(
+                PHP_EOL,
+                array_map(fn(FragmentInterface $fragment) => $fragment->inline(), $parsable->getFragments())
+            ) :
+            '';
+    }
 
-            return $str . PHP_EOL . '}' . PHP_EOL;
-        }
-
-        return '';
+    protected function parseChildren(NodeInterface $parsable): string
+    {
+        return $parsable->hasChildren() ?
+            PHP_EOL . implode(
+                PHP_EOL,
+                array_map(fn(NodeInterface $node) => $node->parse(), $parsable->getChildren())
+            ) : '';
     }
 }

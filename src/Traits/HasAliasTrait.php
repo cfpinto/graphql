@@ -13,7 +13,7 @@ trait HasAliasTrait
 {
     public function alias(string $alias, ?string $who = null): HasAliasInterface
     {
-        if (is_null($who)) {
+        if ($who === null) {
             $name = $this->getName();
             $oldKey = (string)$name;
             if ($name instanceof AliasInterface) {
