@@ -35,3 +35,7 @@ jobs:
       - run: composer install -n --prefer-dist
 
       - run: vendor/bin/phpunit
+
+      - run: vendor/bin/phpunit --coverage-xml coverage-xml
+
+      - run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage-xml/index.xml
