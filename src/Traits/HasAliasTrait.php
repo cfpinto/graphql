@@ -19,7 +19,9 @@ trait HasAliasTrait
 
             if ($name instanceof AliasInterface) {
                 $name->setAlias($alias);
-            } else {
+            }
+
+            if (!($name instanceof AliasInterface)) {
                 $name = new Alias($name, $alias);
             }
 
