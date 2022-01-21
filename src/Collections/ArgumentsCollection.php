@@ -120,9 +120,7 @@ class ArgumentsCollection extends CollectionAbstract
             && !($input instanceof VariableInterface)
             && !($input instanceof ArgumentInterface)
         ) {
-            // phpcs:disable Ignoring gettype error
-            throw new InvalidArgumentTypeException(is_object($input) ? get_class($input) : gettype($input));
-            // phpcs:enable
+            throw new InvalidArgumentTypeException(!is_scalar($input) ? get_class($input) : 'Non Array Scalar');
         }
 
         if ($input instanceof VariableInterface) {

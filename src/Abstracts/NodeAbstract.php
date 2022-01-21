@@ -64,9 +64,7 @@ abstract class NodeAbstract implements NodeInterface
         }
 
         if (!isset($arguments[0]) || !is_array($arguments[0])) {
-            // phpcs:disable Ignoring gettype error
-            throw new InvalidArgumentTypeException(gettype($arguments[0]));
-            // phpcs:enable
+            throw new InvalidArgumentTypeException(is_scalar($arguments[0]) ? 'Non Array Scalar' : get_class($arguments[0]));
         }
 
         return $this->generate($name, $arguments[0] ?? []);
