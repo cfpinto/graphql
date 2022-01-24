@@ -18,12 +18,17 @@ use GraphQL\Contracts\Properties\IsStringableInterface;
 use GraphQL\Entities\Fragment;
 use GraphQL\Entities\Node;
 use GraphQL\Entities\Variable;
+use GraphQL\Exceptions\InvalidArgumentTypeException;
 use GraphQL\Exceptions\InvalidTypeOperationException;
 use GraphQL\Utils\Str;
+use phpDocumentor\Reflection\Types\Callable_;
 use PHPUnit\Framework\TestCase;
+use Tests\Unit\AssertExceptionTrait;
 
 class NodeTest extends TestCase
 {
+    use AssertExceptionTrait;
+
     private Str $str;
 
     public function __construct($name = null, array $data = [], $dataName = '')
@@ -57,7 +62,6 @@ class NodeTest extends TestCase
         $this->assertEquals('foo', $node->getName());
         $node->alias('bar');
         $this->assertEquals('bar: foo', $node->getName());
-
     }
 
     public function testArguments()
@@ -113,17 +117,26 @@ class NodeTest extends TestCase
         $this->assertCount(1, $node->getChildren());
         $node->removeChild('bar');
         $this->assertFalse($node->hasChildren());
-        $this->expectException(InvalidTypeOperationException::class);
-        $node->removeChild('bar2');
         $node->setParentNode($parent);
         $root->addChild('parent', $parent);
         $this->assertEquals($parent, $node->prev());
         $this->assertEquals($parent, $node->getParentNode());
         $this->assertEquals($root, $node->root());
         $this->assertEquals($root, $node->getRootNode());
+        $node->bar2 = new Node('bar2');
+        $this->assertEquals('foo { bar2 {}}', $this->str->ugliffy($node->parse()));
+        $node->clear();
+        $this->assertCount(0, $node->getChildren());
+        $this->assertThrowsException(fn() => $node->bar2(), InvalidArgumentTypeException::class, 'Invalid argument type You must pass an Array as param 0');
+        $this->assertThrowsException(fn() => $node->bar2(23), InvalidArgumentTypeException::class, 'Invalid argument type Non Array Scalar');
+        $this->assertThrowsException(
+            fn() => $node->removeChild('bar3'),
+            InvalidTypeOperationException::class,
+            'Invalid type null expected type GraphQL\Contracts\Entities\NodeInterface'
+        );
     }
 
-    public function testParsability()
+    public function testParseability()
     {
         $node = new Node('foo');
         $this->assertEquals('foo {}', $this->str->ugliffy($node->parse()));
@@ -131,5 +144,8 @@ class NodeTest extends TestCase
         $this->assertEquals('foo { uuid name }', $this->str->ugliffy($node->parse()));
         $node->on('bar')->use('catch');
         $this->assertEquals('foo { uuid name ... on bar { catch }}', $this->str->ugliffy($node->parse()));
+        $this->assertEquals($node->query(), $node->parse());
+        $this->assertCount(1, $node->getParsers());
+        $this->assertEquals('foo { uuid name ... on bar { catch }}', $node->singleLine());
     }
 }

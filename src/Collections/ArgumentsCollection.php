@@ -56,8 +56,7 @@ class ArgumentsCollection extends CollectionAbstract
     {
         foreach ($this->elements as $key => $value) {
             if ($value instanceof VariableInterface && $value->getName() === $variable->getName()) {
-                unset($this->elements[$key]);
-                break;
+                return $this;
             }
         }
 
@@ -131,13 +130,9 @@ class ArgumentsCollection extends CollectionAbstract
             return $input->toString();
         }
 
-        if (is_array($input)) {
-            return implode(
-                ' ',
-                array_map(fn($loopKey) => $this->stringify($input[$loopKey]), array_keys($input)),
-            );
-        }
-
-        return json_encode($input);
+        return implode(
+            ' ',
+            array_map(fn($loopKey) => $this->stringify($input[$loopKey]), array_keys($input)),
+        );
     }
 }
