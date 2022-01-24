@@ -34,7 +34,7 @@ class NodeParser implements ParserInterface
                 . $this->parseFragments($parsable)
                 . $this->parseChildren($parsable)
                 . PHP_EOL . '}' . PHP_EOL,
-                !$singleLine
+                $singleLine
             ) :
             '';
     }

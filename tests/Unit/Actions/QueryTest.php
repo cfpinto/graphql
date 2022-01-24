@@ -8,7 +8,8 @@ use GraphQL\Entities\Variable;
 use GraphQL\Utils\Str;
 use PHPUnit\Framework\TestCase;
 
-class QueryTest extends TestCase {
+class QueryTest extends TestCase
+{
     private Str $str;
 
     public function __construct($name = null, array $data = [], $dataName = '')
@@ -26,6 +27,7 @@ class QueryTest extends TestCase {
 
     public function testQuery()
     {
+        $variable = new Variable('foo', 'String');
         $query = new Query('foo');
         $this->assertEquals('{ foo {}}', $this->str->ugliffy($query->toString()));
         $query->use('id', 'name');
@@ -35,6 +37,12 @@ class QueryTest extends TestCase {
             'query getFoo($name: String){ foo { id name allies(name: $name) {}}}',
             $this->str->ugliffy($query->toString())
         );
+        $query->addVariable($variable);
+        $this->assertCount(2, $query->getVariables());
+        $query->addVariable($variable);
+        $this->assertCount(2, $query->getVariables());
+        $query->removeVariable($variable);
+        $this->assertCount(1, $query->getVariables());
     }
 
 }

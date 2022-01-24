@@ -63,7 +63,11 @@ abstract class NodeAbstract implements NodeInterface
             return $this->useM($arguments);
         }
 
-        if (!isset($arguments[0]) || !is_array($arguments[0])) {
+        if (!isset($arguments[0])) {
+            throw new InvalidArgumentTypeException('You must pass an Array as param 0');
+        }
+
+        if (!is_array($arguments[0])) {
             throw new InvalidArgumentTypeException(is_scalar($arguments[0]) ? 'Non Array Scalar' : get_class($arguments[0]));
         }
 
