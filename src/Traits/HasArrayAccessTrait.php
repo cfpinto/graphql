@@ -6,7 +6,7 @@ trait HasArrayAccessTrait
 {
     protected array $elements = [];
 
-    final public function offsetSet($offset, $value)
+    final public function offsetSet($offset, $value): void
     {
         if (empty($offset) && $offset !== 0) {
             $this->elements[] = $value;
@@ -17,7 +17,7 @@ trait HasArrayAccessTrait
 
     }
 
-    final public function offsetUnset($offset)
+    final public function offsetUnset($offset): void
     {
         unset($this->elements[$offset]);
     }
@@ -27,7 +27,7 @@ trait HasArrayAccessTrait
         return isset($this->elements[$offset]);
     }
 
-    final public function offsetGet($offset)
+    final public function offsetGet($offset): mixed
     {
         return $this->elements[$offset];
     }

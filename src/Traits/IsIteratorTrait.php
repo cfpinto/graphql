@@ -6,17 +6,17 @@ trait IsIteratorTrait
 {
     protected array $elements = [];
 
-    final public function current()
+    final public function current(): mixed
     {
         return current($this->elements);
     }
 
-    final public function next()
+    final public function next(): void
     {
         next($this->elements);
     }
 
-    final public function key()
+    final public function key(): int|string|null
     {
         return key($this->elements);
     }
@@ -26,7 +26,7 @@ trait IsIteratorTrait
         return (bool)current($this->elements);
     }
 
-    final public function rewind()
+    final public function rewind(): void
     {
         reset($this->elements);
     }

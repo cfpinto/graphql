@@ -9,7 +9,7 @@
  */
 require_once 'vendor/autoload.php';
 
-$hero = new \GraphQL\Graph('hero');
+$hero = new \GraphQL\Actions\Query('hero');
 printf(
     '%s',
     $hero->use('name')
@@ -19,7 +19,7 @@ printf(
         ->query()
 );
 
-$hero = new \GraphQL\Graph('hero');
+$hero = new \GraphQL\Actions\Query('hero');
 printf(
     '%s',
     $hero->use('name')
@@ -29,7 +29,7 @@ printf(
         ->query()
 );
 
-$hero = new \GraphQL\Graph('hero');
+$hero = new \GraphQL\Actions\Query('hero');
 printf(
     '%s',
     $hero->use('name')
@@ -42,7 +42,7 @@ printf(
         ->query()
 );
 
-$hero = new \GraphQL\Graph('hero');
+$hero = new \GraphQL\Actions\Query('hero');
 printf(
     '%s',
     $hero->use('name')
@@ -61,7 +61,7 @@ printf(
         ->query()
 );
 
-$hero = new \GraphQL\Graph('hero');
+$hero = new \GraphQL\Actions\Query('hero');
 printf(
     '%s',
     $hero->use('name')
@@ -76,21 +76,21 @@ printf(
         ->query()
 );
 
-$fragment = new \GraphQL\Fragment('properties', 'Hero');
+$fragment = new \GraphQL\Entities\Fragment('properties', 'Hero');
 $fragment->use('id', 'age');
-$hero = new \GraphQL\Graph('hero');
+$hero = new \GraphQL\Actions\Query('hero');
 printf('%s', $hero->use('name', $fragment)->query());
 
-$variable = new \GraphQL\Variable('name', 'String');
-$hero = new \GraphQL\Graph('hero', ['name' => $variable]);
+$variable = new \GraphQL\Entities\Variable('name', 'String');
+$hero = new \GraphQL\Actions\Query('hero', ['name' => $variable]);
 printf('%s', $hero->use('name')->query());
 
-$variable = new \GraphQL\Variable('name', 'String');
-$hero = new \GraphQL\Graph('hero', ['name' => $variable]);
+$variable = new \GraphQL\Entities\Variable('name', 'String');
+$hero = new \GraphQL\Actions\Query('hero', ['name' => $variable]);
 printf('%s', $hero->use('name', '__typename')->query());
 
-$variable = new \GraphQL\Variable('name', 'String');
-$hero = new \GraphQL\Graph('hero', ['name' => $variable]);
+$variable = new \GraphQL\Entities\Variable('name', 'String');
+$hero = new \GraphQL\Actions\Query('hero', ['name' => $variable]);
 printf(
     '%s',
     $hero->use('name', '__typename')
@@ -98,7 +98,7 @@ printf(
         ->query()
 );
 
-$mutation = new GraphQL\Mutation('changeHeroCostumeColor', ['id' => 'theHeroId', 'color' => 'red']);
+$mutation = new GraphQL\Actions\Mutation('changeHeroCostumeColor', ['id' => 'theHeroId', 'color' => 'red']);
 printf(
     '%s',
     $mutation
@@ -110,11 +110,11 @@ printf(
         ->query()
 );
 
-$mutation = new GraphQL\Mutation(
+$mutation = new GraphQL\Actions\Mutation(
     'changeHeroCostumeColor',
     [
-        'id' => new GraphQL\Variable('uuid', 'String', ''),
-        new GraphQL\Variable('color', 'String', '')
+        'id' => new GraphQL\Entities\Variable('uuid', 'String', ''),
+        new GraphQL\Entities\Variable('color', 'String', '')
     ]
 );
 printf(
