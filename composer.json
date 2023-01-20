@@ -15,7 +15,7 @@
   ],
   "license": "MIT",
   "require": {
-    "php": ">=7.4|8.*",
+    "php": "8.*",
     "ext-json": "*"
   },
   "autoload": {
