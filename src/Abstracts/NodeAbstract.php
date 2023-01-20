@@ -74,9 +74,9 @@ abstract class NodeAbstract implements NodeInterface
         return $this->generate($name, $arguments[0] ?? []);
     }
 
-    final public function __set(string $name, NodeInterface $value): NodeInterface
+    final public function __set(string $name, NodeInterface $value): void
     {
-        return $this->addChild($name, $value);
+        $this->addChild($name, $value);
     }
 
     final public function toString(): string
