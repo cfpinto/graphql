@@ -40,8 +40,10 @@ class Argument implements ArgumentInterface
             if (is_string($this->value)) {
                 return $this->value;
             }
-
             return json_encode($this->value);
+        }
+        elseif (is_object($this->value) && enum_exists(get_class($this->value))) {
+            return $this->key . ': ' . $this->value->name;
         }
 
         return $this->key . ': ' . json_encode($this->value);
