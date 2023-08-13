@@ -65,6 +65,10 @@ class ArgumentsCollectionTest extends TestCase
         $this->assertCount(2, $this->collection->getArguments());
         $this->collection->clear();
         $this->assertCount(0, $this->collection->getArguments());
+        $this->collection->addArgument(new Argument(TestingEnum::OPTION1, 'baz1'));
+        $this->collection->addArgument(new Argument(TestingEnum::OPTION2, 'baz2'));
+        $this->assertCount(2, $this->collection->getArguments());
+        $this->assertSame('baz1: OPTION1 baz2: OPTION2', $this->collection->toString());
     }
 
     public function testInvalidArguments()
@@ -86,4 +90,10 @@ class ArgumentsCollectionTest extends TestCase
 
         $this->assertEquals('test: 1', $collection->toString());
     }
+}
+
+enum TestingEnum
+{
+    case OPTION1;
+    case OPTION2;
 }
