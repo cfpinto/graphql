@@ -1,6 +1,9 @@
 name: CI Pipeline GraphQL Query Builder
 on:
   pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
   test:

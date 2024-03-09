@@ -1,7 +1,6 @@
 # graphql
 
 A simple yet powerful GraphQL query builder
-[![CircleCI](https://circleci.com/gh/cfpinto/graphql/tree/master.svg?style=svg)](https://circleci.com/gh/cfpinto/graphql/tree/master)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/fce20e3c3a194a77aca585e68fd48fc1)](https://www.codacy.com/gh/cfpinto/graphql/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cfpinto/graphql&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/fce20e3c3a194a77aca585e68fd48fc1)](https://www.codacy.com/gh/cfpinto/graphql/dashboard?utm_source=github.com&utm_medium=referral&utm_content=cfpinto/graphql&utm_campaign=Badge_Coverage)
 
