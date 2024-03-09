@@ -43,6 +43,9 @@ class Argument implements ArgumentInterface
 
             return json_encode($this->value);
         }
+        elseif (is_object($this->value) && enum_exists(get_class($this->value))) {
+            return $this->key . ': ' . $this->value->name;
+        }
 
         return $this->key . ': ' . json_encode($this->value);
     }

@@ -21,7 +21,7 @@ class ArgumentsCollection extends CollectionAbstract
     public function __construct(array $array)
     {
         foreach ($array as $key => $value) {
-            if (!is_object($value)) {
+            if (!is_object($value) || enum_exists(get_class($value))) {
                 $array[$key] = new Argument($value, $key);
             }
         }
