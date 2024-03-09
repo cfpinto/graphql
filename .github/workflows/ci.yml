@@ -1,0 +1,25 @@
+name: CI Pipeline GraphQL Query Builder
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        uses: php-actions/composer@v6
+      - name: Unit tests
+        uses: php-actions/phpunit@v3
+        with:
+          php_version: 8.2
+          php_extensions: zip xdebug
+          coverage_clover: coverage-xml/index.xml
+          args: --coverage-filter src tests
+        env:
+          XDEBUG_MODE: coverage
+      - name: Export to Codacy
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage-xml/index.xml
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
