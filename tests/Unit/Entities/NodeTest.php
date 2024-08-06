@@ -21,7 +21,6 @@ use GraphQL\Entities\Variable;
 use GraphQL\Exceptions\InvalidArgumentTypeException;
 use GraphQL\Exceptions\InvalidTypeOperationException;
 use GraphQL\Utils\Str;
-use phpDocumentor\Reflection\Types\Callable_;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\AssertExceptionTrait;
 
@@ -75,9 +74,9 @@ class NodeTest extends TestCase
         $this->assertTrue($node->hasArguments());
         $this->assertCount(2, $node->getArguments());
         $this->assertCount(1, $query->getVariables());
-        $this->assertEquals('foo(bar: true var: $var) {}', $this->str->ugliffy($node->toString()));
+        $this->assertEquals('foo(bar: true var: $var)', $this->str->ugliffy($node->toString()));
         $this->assertEquals(
-            'query getFoo($var: String){ foo { foo(bar: true var: $var) {}}}',
+            'query getFoo($var: String){ foo { foo(bar: true var: $var) }}',
             $this->str->ugliffy($query->toString())
         );
     }
@@ -101,7 +100,7 @@ class NodeTest extends TestCase
         $this->assertEquals('foo { ...bar }', $this->str->ugliffy($node->toString()));
         $node->removeFragment($fragment);
         $this->assertFalse($node->hasFragments());
-        $this->assertEquals('foo {}', $this->str->ugliffy($node->toString()));
+        $this->assertEquals('foo', $this->str->ugliffy($node->toString()));
         $node->on('foo')->use('bar');
         $this->assertEquals('foo { ... on foo { bar }}', $this->str->ugliffy($node->toString()));
     }
@@ -124,7 +123,7 @@ class NodeTest extends TestCase
         $this->assertEquals($root, $node->root());
         $this->assertEquals($root, $node->getRootNode());
         $node->bar2 = new Node('bar2');
-        $this->assertEquals('foo { bar2 {}}', $this->str->ugliffy($node->parse()));
+        $this->assertEquals('foo { bar2 }', $this->str->ugliffy($node->parse()));
         $node->clear();
         $this->assertCount(0, $node->getChildren());
         $this->assertThrowsException(fn() => $node->bar2(), InvalidArgumentTypeException::class, 'Invalid argument type You must pass an Array as param 0');
@@ -139,7 +138,7 @@ class NodeTest extends TestCase
     public function testParseability()
     {
         $node = new Node('foo');
-        $this->assertEquals('foo {}', $this->str->ugliffy($node->parse()));
+        $this->assertEquals('foo', $this->str->ugliffy($node->parse()));
         $node->use('uuid', 'name');
         $this->assertEquals('foo { uuid name }', $this->str->ugliffy($node->parse()));
         $node->on('bar')->use('catch');

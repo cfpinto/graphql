@@ -29,7 +29,7 @@ class MutationTest extends TestCase
     public function testMutation()
     {
         $mutation = new Mutation('fooBar', ['id' => 1, 'name' => 'bar']);
-        $this->assertEquals('mutation fooBar(id: 1 name: "bar") {}', $this->str->ugliffy($mutation->toString()));
+        $this->assertEquals('mutation fooBar(id: 1 name: "bar")', $this->str->ugliffy($mutation->toString()));
         $mutation->use('id', 'name');
         $this->assertEquals('mutation fooBar(id: 1 name: "bar") { id name }', $this->str->ugliffy($mutation->toString()));
         $mutation = new Mutation('fooBar2', ['name' => 'foo', 'test' => new Variable('bar', 'String')]);

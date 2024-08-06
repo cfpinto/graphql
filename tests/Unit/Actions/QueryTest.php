@@ -29,12 +29,12 @@ class QueryTest extends TestCase
     {
         $variable = new Variable('foo', 'String');
         $query = new Query('foo');
-        $this->assertEquals('{ foo {}}', $this->str->ugliffy($query->toString()));
+        $this->assertEquals('{ foo }', $this->str->ugliffy($query->toString()));
         $query->use('id', 'name');
         $this->assertEquals('{ foo { id name }}', $this->str->ugliffy($query->toString()));
         $query->allies(['name' => new Variable('name', 'String')]);
         $this->assertEquals(
-            'query getFoo($name: String){ foo { id name allies(name: $name) {}}}',
+            'query getFoo($name: String){ foo { id name allies(name: $name) }}',
             $this->str->ugliffy($query->toString())
         );
         $query->addVariable($variable);
