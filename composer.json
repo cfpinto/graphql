@@ -28,6 +28,9 @@
       "Tests\\": "tests/"
     }
   },
+  "scripts": {
+    "test": "phpunit tests/ --whitelist src/ --coverage-clover build/coverage/xml"
+},
   "require-dev": {
     "symfony/var-dumper": "^6.2",
     "squizlabs/php_codesniffer": "^3.7",

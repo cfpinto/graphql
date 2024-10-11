@@ -27,13 +27,18 @@ class NodeParser implements ParserInterface
 
     public function parse(IsParsableInterface $parsable, bool $singleLine = false): string
     {
+        $includes = $this->parseAttributes($parsable)
+        . $this->parseFragments($parsable)
+        . $this->parseChildren($parsable);
+        if($includes) {
+            $includes = ' {' . PHP_EOL . $includes . PHP_EOL . '}' . PHP_EOL;
+        }
+
         return $parsable instanceof NodeInterface ?
             $this->strHelper->ugliffy(
-                $this->parseArguments($parsable)
-                . $this->parseAttributes($parsable)
-                . $this->parseFragments($parsable)
-                . $this->parseChildren($parsable)
-                . PHP_EOL . '}' . PHP_EOL,
+                $parsable->getName()
+                . $this->parseArguments($parsable)
+                .  $includes,
                 $singleLine
             ) :
             '';
@@ -42,8 +47,9 @@ class NodeParser implements ParserInterface
     protected function parseArguments(NodeInterface $parsable): string
     {
         return $parsable->hasArguments() ?
-            $parsable->getName() . '(' . $parsable->getArguments() . ') {' . PHP_EOL :
-            $parsable->getName() . ' {' . PHP_EOL;
+             '(' . $parsable->getArguments() . ') '
+             : '';
+
     }
 
     protected function parseAttributes(NodeInterface $parsable): string
