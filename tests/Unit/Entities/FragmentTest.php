@@ -100,4 +100,73 @@ class FragmentTest extends TestCase
         $this->assertEquals('fragment foo on Bar { name }', $this->str->ugliffy($fragment->toString()));
         $this->assertEquals('...foo', $fragment->inline());
     }
+
+    public function testNestedFieldWithArguments()
+    {
+        $fragment = new Fragment('hero', 'Hero');
+        $fragment->use('name');
+        $friends = $fragment->friends(['first' => 2]);
+        $friends->use('name');
+
+        $this->assertInstanceOf(Node::class, $friends);
+        $this->assertTrue($fragment->hasChildren());
+        $this->assertSame(['friends' => $friends], $fragment->getChildren());
+        $this->assertEquals(
+            'fragment hero on Hero { name friends(first: 2) { name }}',
+            $this->str->ugliffy($fragment->toString())
+        );
+    }
+
+    public function testNestedFieldWithoutArguments()
+    {
+        $fragment = new Fragment('hero', 'Hero');
+        $fragment->costumes->use('color');
+
+        $this->assertEquals(
+            'fragment hero on Hero { costumes { color }}',
+            $this->str->ugliffy($fragment->toString())
+        );
+    }
+
+    public function testDeeplyNestedFields()
+    {
+        $fragment = new Fragment('hero', 'Hero');
+        $fragment->friends(['first' => 2])
+            ->use('name')
+            ->costumes(['season' => 1])
+            ->use('color');
+
+        $this->assertEquals(
+            'fragment hero on Hero { friends(first: 2) { name costumes(season: 1) { color }}}',
+            $this->str->ugliffy($fragment->toString())
+        );
+    }
+
+    public function testNestedFieldFailsWithNonArrayArgument()
+    {
+        $this->expectException(InvalidArgumentTypeException::class);
+
+        $fragment = new Fragment('hero', 'Hero');
+        $fragment->friends(2);
+    }
+
+    public function testNestedFieldFailsWithoutArgument()
+    {
+        $this->expectException(InvalidArgumentTypeException::class);
+
+        $fragment = new Fragment('hero', 'Hero');
+        $fragment->friends();
+    }
+
+    public function testInlineFragmentWithNestedField()
+    {
+        $fragment = new InlineFragment('Droid');
+        $fragment->use('primaryFunction');
+        $fragment->friends(['first' => 1])->use('name');
+
+        $this->assertEquals(
+            '... on Droid { primaryFunction friends(first: 1) { name }}',
+            $this->str->ugliffy($fragment->toString())
+        );
+    }
 }
