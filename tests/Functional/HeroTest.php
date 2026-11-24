@@ -93,4 +93,17 @@ class HeroTest extends TestCase
             $this->str->ugliffy($fragment->toString())
         );
     }
+
+    public function testHeroWithFragmentWithNestedFields()
+    {
+        $fragment = new Fragment('heroFields', 'Hero');
+        $fragment->use('name');
+        $fragment->friends(['first' => 2])->use('name');
+        $hero = new Query('hero', ['id' => '1']);
+
+        $this->assertEquals(
+            'fragment heroFields on Hero { name friends(first: 2) { name }} { hero(id: "1") { id ...heroFields }}',
+            $this->str->ugliffy($hero->use('id', $fragment)->parse())
+        );
+    }
 }
