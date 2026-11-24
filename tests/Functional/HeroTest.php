@@ -56,7 +56,7 @@ class HeroTest extends TestCase
             ->use('color');
 
         $this->assertEquals(
-            'mutation changeHeroCostumeColor(id: "theHeroId" color: "red") { hero { name costumes { color }}}',
+            'mutation { changeHeroCostumeColor(id: "theHeroId" color: "red") { hero { name costumes { color }}}}',
             $this->str->ugliffy($mutation->toString())
         );
     }
