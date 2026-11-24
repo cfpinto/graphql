@@ -4,8 +4,10 @@ namespace Tests\Unit\Actions;
 
 use GraphQL\Actions\Query;
 use GraphQL\Contracts\Entities\RootNodeInterface;
+use GraphQL\Contracts\Properties\HasOperationNameInterface;
 use GraphQL\Entities\Variable;
 use GraphQL\Utils\Str;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class QueryTest extends TestCase
@@ -45,4 +47,47 @@ class QueryTest extends TestCase
         $this->assertCount(1, $query->getVariables());
     }
 
+    public function testOperationNameWithVariables()
+    {
+        $query = new Query('hero', ['name' => new Variable('name', 'String')]);
+        $result = $query->setOperationName('getMyHeroName');
+
+        $this->assertSame($query, $result);
+        $this->assertInstanceOf(HasOperationNameInterface::class, $query);
+        $this->assertTrue($query->hasOperationName());
+        $this->assertEquals('getMyHeroName', $query->getOperationName());
+        $this->assertEquals(
+            'query getMyHeroName($name: String){ hero(name: $name) { name }}',
+            $this->str->ugliffy($query->use('name')->toString())
+        );
+    }
+
+    public function testOperationNameWithoutVariables()
+    {
+        $query = (new Query('hero', ['id' => 1]))->setOperationName('HeroById');
+
+        $this->assertEquals(
+            'query HeroById { hero(id: 1) { name }}',
+            $this->str->ugliffy($query->use('name')->toString())
+        );
+    }
+
+    public function testOperationNameCanBeReset()
+    {
+        $query = new Query('hero', ['name' => new Variable('name', 'String')]);
+        $query->setOperationName('getMyHeroName')->setOperationName(null);
+
+        $this->assertFalse($query->hasOperationName());
+        $this->assertEquals(
+            'query getHero($name: String){ hero(name: $name) { name }}',
+            $this->str->ugliffy($query->use('name')->toString())
+        );
+    }
+
+    public function testInvalidOperationName()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new Query('hero'))->setOperationName('my hero');
+    }
 }

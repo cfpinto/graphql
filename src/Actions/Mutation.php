@@ -9,8 +9,10 @@
 namespace GraphQL\Actions;
 
 use GraphQL\Contracts\Entities\RootNodeInterface;
+use GraphQL\Contracts\Properties\HasOperationNameInterface;
 use GraphQL\Entities\Node;
 use GraphQL\Parsers\MutationParser;
+use GraphQL\Traits\HasOperationNameTrait;
 use GraphQL\Traits\HasVariablesTrait;
 
 /**
@@ -18,8 +20,9 @@ use GraphQL\Traits\HasVariablesTrait;
  *
  * @package GraphQL
  */
-class Mutation extends Node implements RootNodeInterface
+class Mutation extends Node implements RootNodeInterface, HasOperationNameInterface
 {
+    use HasOperationNameTrait;
     use HasVariablesTrait;
 
     public function __construct(string $name, array $arguments = [])

@@ -5,12 +5,15 @@ namespace GraphQL\Actions;
 
 
 use GraphQL\Contracts\Entities\RootNodeInterface;
+use GraphQL\Contracts\Properties\HasOperationNameInterface;
 use GraphQL\Entities\Node;
 use GraphQL\Parsers\QueryParser;
+use GraphQL\Traits\HasOperationNameTrait;
 use GraphQL\Traits\HasVariablesTrait;
 
-class Query extends Node implements RootNodeInterface
+class Query extends Node implements RootNodeInterface, HasOperationNameInterface
 {
+    use HasOperationNameTrait;
     use HasVariablesTrait;
 
     public function __construct(string $name, array $arguments = [])
