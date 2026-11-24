@@ -59,4 +59,21 @@ class HeroTest extends TestCase
             $this->str->ugliffy($mutation->toString())
         );
     }
+
+    public function testHeroSearchWithObjectArgument()
+    {
+        $search = new Query('heroes', [
+            'nearVector' => [
+                'vector' => 'test',
+                'certainty' => 0.7,
+            ],
+            'limit' => 100,
+        ]);
+        $search->use('name');
+
+        $this->assertEquals(
+            '{ heroes(nearVector: {vector: "test", certainty: 0.7} limit: 100) { name }}',
+            $this->str->ugliffy($search->toString())
+        );
+    }
 }
