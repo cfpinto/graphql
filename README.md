@@ -219,7 +219,8 @@ fragment properties on Hero {
 
 To get only the fragment definition, call `$fragment->toString()`.
 
-A fragment can also hold nested fields, with or without arguments, the same way as a query
+A fragment can also hold nested fields, with or without arguments,
+the same way as a query
 
 ```php
 $fragment = new GraphQL\Entities\Fragment('heroFields', 'Hero');
