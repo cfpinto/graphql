@@ -6,6 +6,7 @@ namespace Tests\Functional;
 
 use GraphQL\Actions\Mutation;
 use GraphQL\Actions\Query;
+use GraphQL\Entities\Fragment;
 use GraphQL\Entities\Node;
 use GraphQL\Utils\Str;
 use PHPUnit\Framework\TestCase;
@@ -74,6 +75,22 @@ class HeroTest extends TestCase
         $this->assertEquals(
             '{ heroes(nearVector: {vector: "test", certainty: 0.7} limit: 100) { name }}',
             $this->str->ugliffy($search->toString())
+        );
+    }
+
+    public function testHeroWithFragment()
+    {
+        $fragment = new Fragment('properties', 'Hero');
+        $fragment->use('id', 'age');
+        $hero = new Query('hero');
+
+        $this->assertEquals(
+            'fragment properties on Hero { id age } { hero { name ...properties }}',
+            $this->str->ugliffy($hero->use('name', $fragment)->parse())
+        );
+        $this->assertEquals(
+            'fragment properties on Hero { id age }',
+            $this->str->ugliffy($fragment->toString())
         );
     }
 }
