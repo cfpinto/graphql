@@ -358,11 +358,13 @@ $mutation
 Will generate
 
 ```text
-mutation changeHeroCostumeColor(id: 'theHeroId', color: 'red') {
-    hero {
-        name
-        costumes {
-            color
+mutation {
+    changeHeroCostumeColor(id: "theHeroId" color: "red") {
+        hero {
+            name
+            costumes {
+                color
+            }
         }
     }
 }
@@ -384,8 +386,8 @@ $mutation
 Will generate
 
 ```text
-mutation ChangeHeroCostumeColorMutation($uuid: String, $color: String) {
-    changeHeroCostumeColorAction(id: $uuid, color: $color) {
+mutation ChangeHeroCostumeColorMutation($uuid: String $color: String) {
+    changeHeroCostumeColor(uuid: $uuid color: $color) {
         hero {
             name
             costumes {

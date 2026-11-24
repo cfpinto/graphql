@@ -32,8 +32,7 @@ class MutationParser extends NodeParser
                 }
             }
 
-            $suffix = '';
-            $varStr = 'mutation ';
+            $header = 'mutation';
             $operationName = $parsable instanceof HasOperationNameInterface ?
                 $parsable->getOperationName() :
                 null;
@@ -47,14 +46,16 @@ class MutationParser extends NodeParser
                         $parsable->getVariables()
                     )
                 );
-                $varStr = PHP_EOL . "mutation {$mutationName}({$variables}) {" . PHP_EOL;
-                $suffix = PHP_EOL . '}';
+                $header .= " {$mutationName}({$variables})";
             } elseif ($operationName !== null) {
-                $varStr = PHP_EOL . "mutation {$operationName} {" . PHP_EOL;
-                $suffix = PHP_EOL . '}';
+                $header .= " {$operationName}";
             }
 
-            $str .= PHP_EOL . $this->strHelper->ident($varStr . parent::parse($parsable)) . $suffix;
+            // The mutation field always sits inside the operation's selection set:
+            // `mutation [Name[(vars)]] { field(args) { ... } }`
+            $str .= PHP_EOL . $this->strHelper->ident(
+                $header . ' {' . PHP_EOL . parent::parse($parsable) . PHP_EOL . '}'
+            );
         }
 
         if ($singleLine) {

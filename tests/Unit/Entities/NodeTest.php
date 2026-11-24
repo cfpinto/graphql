@@ -21,6 +21,7 @@ use GraphQL\Entities\Variable;
 use GraphQL\Exceptions\InvalidArgumentTypeException;
 use GraphQL\Exceptions\InvalidTypeOperationException;
 use GraphQL\Utils\Str;
+use GraphQL\Entities\InlineFragment;
 use PHPUnit\Framework\TestCase;
 use Tests\Unit\AssertExceptionTrait;
 
@@ -146,5 +147,54 @@ class NodeTest extends TestCase
         $this->assertEquals($node->query(), $node->parse());
         $this->assertCount(1, $node->getParsers());
         $this->assertEquals('foo { uuid name ... on bar { catch }}', $node->singleLine());
+    }
+
+    public function testUseFailsWithVariable()
+    {
+        $this->expectException(InvalidArgumentTypeException::class);
+
+        (new Node('hero'))->use(new Variable('name', 'String'));
+    }
+
+    public function testUseWithInlineFragment()
+    {
+        $droid = new InlineFragment('Droid');
+        $droid->use('primaryFunction');
+        $query = new Query('hero');
+        $query->use('name', $droid);
+
+        $this->assertEquals(
+            '{ hero { name ... on Droid { primaryFunction }}}',
+            (new Str())->ugliffy($query->toString())
+        );
+    }
+
+    public function testUseWithArrayAlias()
+    {
+        $query = new Query('hero');
+        $query->use(['name' => 'heroName']);
+
+        $this->assertEquals('{ hero { heroName: name }}', (new Str())->ugliffy($query->toString()));
+    }
+
+    public function testFieldsNamedAfterEntityClasses()
+    {
+        $query = new Query('hero');
+        foreach (['alias', 'argument', 'fragment', 'variable'] as $field) {
+            $this->assertInstanceOf(Node::class, $query->{$field});
+            $query->{$field}->use('id');
+        }
+
+        $this->assertEquals(
+            '{ hero { alias { id } argument { id } fragment { id } variable { id }}}',
+            (new Str())->ugliffy($query->toString())
+        );
+    }
+
+    public function testFieldNamedNodeUsesNodeClass()
+    {
+        $query = new Query('hero');
+
+        $this->assertInstanceOf(Node::class, $query->node);
     }
 }

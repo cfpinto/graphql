@@ -90,4 +90,12 @@ class QueryTest extends TestCase
 
         (new Query('hero'))->setOperationName('my hero');
     }
+
+    public function testSingleLine()
+    {
+        $query = new Query('hero', ['id' => 1]);
+        $query->use('name');
+
+        $this->assertEquals('{ hero(id: 1) { name }}', $query->singleLine());
+    }
 }

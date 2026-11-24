@@ -14,16 +14,8 @@ trait HasAliasTrait
     public function alias(string $alias, ?string $who = null): HasAliasInterface
     {
         if ($who === null) {
-            $name = $this->getName();
-            $oldKey = (string)$name;
-
-            if ($name instanceof AliasInterface) {
-                $name->setAlias($alias);
-            }
-
-            if (!($name instanceof AliasInterface)) {
-                $name = new Alias($name, $alias);
-            }
+            $oldKey = $this->getName();
+            $name = new Alias($oldKey, $alias);
 
             if ($this instanceof HasParentInterface && $this->getParentNode()) {
                 $this->getParentNode()

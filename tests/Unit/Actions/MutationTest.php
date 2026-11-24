@@ -8,6 +8,8 @@ use GraphQL\Actions\Mutation;
 use GraphQL\Contracts\Entities\RootNodeInterface;
 use GraphQL\Entities\Variable;
 use GraphQL\Utils\Str;
+use GraphQL\Entities\Fragment;
+use GraphQL\Entities\InlineFragment;
 use PHPUnit\Framework\TestCase;
 
 class MutationTest extends TestCase
@@ -29,9 +31,9 @@ class MutationTest extends TestCase
     public function testMutation()
     {
         $mutation = new Mutation('fooBar', ['id' => 1, 'name' => 'bar']);
-        $this->assertEquals('mutation fooBar(id: 1 name: "bar")', $this->str->ugliffy($mutation->toString()));
+        $this->assertEquals('mutation { fooBar(id: 1 name: "bar") }', $this->str->ugliffy($mutation->toString()));
         $mutation->use('id', 'name');
-        $this->assertEquals('mutation fooBar(id: 1 name: "bar") { id name }', $this->str->ugliffy($mutation->toString()));
+        $this->assertEquals('mutation { fooBar(id: 1 name: "bar") { id name }}', $this->str->ugliffy($mutation->toString()));
         $mutation = new Mutation('fooBar2', ['name' => 'foo', 'test' => new Variable('bar', 'String')]);
         $mutation->use('id', 'name');
         $this->assertEquals(
@@ -58,6 +60,40 @@ class MutationTest extends TestCase
 
         $this->assertEquals(
             'mutation RenameHero { changeName(name: "Luke") { id }}',
+            $this->str->ugliffy($mutation->toString())
+        );
+    }
+
+    public function testSingleLine()
+    {
+        $mutation = new Mutation('createHero', ['name' => 'Luke']);
+        $mutation->use('id');
+
+        $this->assertEquals('mutation { createHero(name: "Luke") { id }}', $mutation->singleLine());
+    }
+
+    public function testFragmentIsDefinedBeforeMutation()
+    {
+        $fragment = new Fragment('heroFields', 'Hero');
+        $fragment->use('id');
+        $mutation = new Mutation('createHero', ['name' => 'Luke']);
+        $mutation->use($fragment);
+
+        $this->assertEquals(
+            'fragment heroFields on Hero { id } mutation { createHero(name: "Luke") { ...heroFields }}',
+            $this->str->ugliffy($mutation->toString())
+        );
+    }
+
+    public function testInlineFragmentIsNotDefinedBeforeMutation()
+    {
+        $droid = new InlineFragment('Droid');
+        $droid->use('primaryFunction');
+        $mutation = new Mutation('createHero', ['name' => 'R2']);
+        $mutation->use($droid);
+
+        $this->assertEquals(
+            'mutation { createHero(name: "R2") { ... on Droid { primaryFunction }}}',
             $this->str->ugliffy($mutation->toString())
         );
     }

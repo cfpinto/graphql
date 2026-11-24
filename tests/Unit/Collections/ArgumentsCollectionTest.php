@@ -90,6 +90,26 @@ class ArgumentsCollectionTest extends TestCase
 
         $this->assertEquals('test: 1', $collection->toString());
     }
+
+    public function testArrayAccess()
+    {
+        $collection = new ArgumentsCollection([]);
+        $first = new Argument(1, 'first');
+        $last = new Argument(2, 'last');
+
+        $collection[] = $first;
+        $collection['last'] = $last;
+
+        $this->assertTrue(isset($collection[0]));
+        $this->assertTrue(isset($collection['last']));
+        $this->assertFalse(isset($collection['missing']));
+        $this->assertSame($first, $collection[0]);
+        $this->assertSame($last, $collection['last']);
+
+        unset($collection['last']);
+        $this->assertFalse(isset($collection['last']));
+        $this->assertCount(1, $collection);
+    }
 }
 
 enum TestingEnum

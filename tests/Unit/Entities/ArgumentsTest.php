@@ -93,6 +93,16 @@ final class ArgumentsTest extends TestCase
         $argument = new Argument(['foo' => 'bar']);
         $this->assertEquals('{foo: "bar"}', $argument->toString());
     }
+
+    public function testGetters()
+    {
+        $argument = new Argument('bar', 'foo');
+        $this->assertEquals('foo', $argument->getKey());
+        $this->assertEquals('bar', $argument->getValue());
+
+        $argument = new Argument('bar');
+        $this->assertNull($argument->getKey());
+    }
 }
 
 enum ArgumentsTestEnum
