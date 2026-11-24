@@ -16,6 +16,7 @@ jobs:
       - name: Unit tests
         uses: php-actions/phpunit@v3
         with:
+          version: 9.5.28
           php_version: 8.2
           php_extensions: zip xdebug
           coverage_clover: coverage-xml/index.xml
