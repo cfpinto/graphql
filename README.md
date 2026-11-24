@@ -33,7 +33,7 @@ echo $hero->use('name')
     ->friends
         ->use('name')
     ->root()
-        ->query();
+        ->parse();
 ``` 
 
 will generate
@@ -59,7 +59,7 @@ echo $hero->use('name')
     ->friends(['first'=>2])
         ->use('name')
     ->root()
-        ->query();
+        ->parse();
 ```
 
 will generate
@@ -89,7 +89,7 @@ echo $hero->use('name')
     ->costumes
         ->color
     ->root()
-        ->query();
+        ->parse();
 ```
 
 will generate
@@ -127,7 +127,7 @@ echo $hero->use('name')
     ->costumes
         ->color
     ->root()
-        ->query();
+        ->parse();
 ```
 
 Will generate
@@ -168,7 +168,7 @@ echo $hero->use('name')
     ->costumes
         ->color
     ->root()
-        ->query();
+        ->parse();
 ```
 
 will generate
@@ -199,25 +199,25 @@ regular property
 $fragment = new GraphQL\Entities\Fragment('properties', 'Hero');
 $fragment->use('id', 'age');
 $hero = new \GraphQL\Actions\Query('hero');
-echo $hero->use('name', $fragment)->query();
-echo $fragment->query();
+echo $hero->use('name', $fragment)->parse();
 ```
 
-will generate
+will generate the fragment definition followed by the query that uses it
 
 ```text
+fragment properties on Hero {
+    id
+    age
+}
 {
     hero {
         name
         ...properties
     }
 }
-
-fragment properties on Hero {
-    id
-    age
-}
 ```
+
+To get only the fragment definition, call `$fragment->toString()`.
 
 #### Variables
 
@@ -226,7 +226,7 @@ The use of variables feels less necessary because we're using PHP to build the q
 ```php
 $variable = new GraphQL\Entities\Variable('name', 'String');
 $hero = new \GraphQL\Actions\Query('hero', ['name' => $variable]);
-echo $hero->use('name')->query();
+echo $hero->use('name')->parse();
 ```
 
 will generate
@@ -246,7 +246,7 @@ you can also use meta fields the same way you would request a property
 ```php
 $variable = new GraphQL\Entities\Variable('name', 'String');
 $hero = new \GraphQL\Actions\Query('hero', ['name' => $variable]);
-echo $hero->use('name', '__typename')->query();
+echo $hero->use('name', '__typename')->parse();
 ```
 
 will generate
@@ -267,7 +267,7 @@ $variable = new GraphQL\Entities\Variable('name', 'String');
 $hero = new \GraphQL\Actions\Query('hero', ['name' => $variable]);
 echo $hero->use('name', '__typename')
     ->alias('type', '__typename')
-    ->query();
+    ->parse();
 ```
 
 will generate
@@ -295,7 +295,7 @@ $mutation
         ->costumes
             ->use('color')
     ->root()
-        ->query();
+        ->parse();
 ``` 
 
 Will generate
@@ -321,7 +321,7 @@ $mutation
         ->costumes
             ->use('color')
     ->root()
-        ->query();
+        ->parse();
 ``` 
 
 Will generate
