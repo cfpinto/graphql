@@ -7,6 +7,7 @@ namespace GraphQL\Parsers;
 use GraphQL\Contracts\Entities\InlineFragmentInterface;
 use GraphQL\Contracts\Entities\RootNodeInterface;
 use GraphQL\Contracts\Entities\VariableInterface;
+use GraphQL\Contracts\Properties\HasOperationNameInterface;
 use GraphQL\Contracts\Properties\IsParsableInterface;
 use GraphQL\Actions\Query;
 use GraphQL\Utils\Str;
@@ -32,8 +33,12 @@ class QueryParser extends NodeParser
             }
 
             $varStr = '';
+            $operationName = $parsable instanceof HasOperationNameInterface ?
+                $parsable->getOperationName() :
+                null;
+
             if ($parsable->hasVariables()) {
-                $queryName = 'get' . ucfirst($parsable->getName());
+                $queryName = $operationName ?? 'get' . ucfirst($parsable->getName());
                 $variables = implode(
                     ' ',
                     array_map(
@@ -42,6 +47,8 @@ class QueryParser extends NodeParser
                     )
                 );
                 $varStr = PHP_EOL . "query {$queryName}({$variables})";
+            } elseif ($operationName !== null) {
+                $varStr = PHP_EOL . "query {$operationName} ";
             }
 
             $str .= PHP_EOL . $this->strHelper->ident(

@@ -264,12 +264,37 @@ echo $hero->use('name')->parse();
 will generate
 
 ```text
-query getGraph($name: String){
+query getHero($name: String){
     hero(name: $name) {
         name
     }
 }
 ```
+
+#### Operation name
+
+By default the query above is named `get` followed by the root field name
+(`getHero`), and a mutation is named after the root field followed by
+`Mutation`. To choose the name, call `setOperationName()`
+
+```php
+$variable = new GraphQL\Entities\Variable('name', 'String');
+$hero = new \GraphQL\Actions\Query('hero', ['name' => $variable]);
+echo $hero->setOperationName('getMyHeroName')->use('name')->parse();
+```
+
+will generate
+
+```text
+query getMyHeroName($name: String){
+    hero(name: $name) {
+        name
+    }
+}
+```
+
+The name also works without variables. Pass `null` to go back to the
+default name.
 
 #### Meta fields
 

@@ -7,6 +7,7 @@ namespace GraphQL\Parsers;
 use GraphQL\Contracts\Entities\InlineFragmentInterface;
 use GraphQL\Contracts\Entities\RootNodeInterface;
 use GraphQL\Contracts\Entities\VariableInterface;
+use GraphQL\Contracts\Properties\HasOperationNameInterface;
 use GraphQL\Contracts\Properties\IsParsableInterface;
 use GraphQL\Actions\Mutation;
 
@@ -33,9 +34,12 @@ class MutationParser extends NodeParser
 
             $suffix = '';
             $varStr = 'mutation ';
+            $operationName = $parsable instanceof HasOperationNameInterface ?
+                $parsable->getOperationName() :
+                null;
 
             if ($parsable->hasVariables()) {
-                $mutationName = ucfirst($parsable->getName()) . 'Mutation';
+                $mutationName = $operationName ?? ucfirst($parsable->getName()) . 'Mutation';
                 $variables = implode(
                     ' ',
                     array_map(
@@ -44,6 +48,9 @@ class MutationParser extends NodeParser
                     )
                 );
                 $varStr = PHP_EOL . "mutation {$mutationName}({$variables}) {" . PHP_EOL;
+                $suffix = PHP_EOL . '}';
+            } elseif ($operationName !== null) {
+                $varStr = PHP_EOL . "mutation {$operationName} {" . PHP_EOL;
                 $suffix = PHP_EOL . '}';
             }
 

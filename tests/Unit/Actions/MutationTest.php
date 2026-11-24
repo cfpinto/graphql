@@ -39,4 +39,26 @@ class MutationTest extends TestCase
             $this->str->ugliffy($mutation->toString())
         );
     }
+
+    public function testOperationNameWithVariables()
+    {
+        $mutation = new Mutation('changeName', ['name' => new Variable('name', 'String')]);
+        $mutation->setOperationName('RenameHero')->use('id');
+
+        $this->assertEquals(
+            'mutation RenameHero($name: String) { changeName(name: $name) { id }}',
+            $this->str->ugliffy($mutation->toString())
+        );
+    }
+
+    public function testOperationNameWithoutVariables()
+    {
+        $mutation = new Mutation('changeName', ['name' => 'Luke']);
+        $mutation->setOperationName('RenameHero')->use('id');
+
+        $this->assertEquals(
+            'mutation RenameHero { changeName(name: "Luke") { id }}',
+            $this->str->ugliffy($mutation->toString())
+        );
+    }
 }
