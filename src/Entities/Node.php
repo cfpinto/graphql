@@ -38,7 +38,7 @@ class Node extends NodeAbstract
 
         return $this->addChild(
             $name,
-            class_exists($className) ?
+            is_subclass_of($className, NodeInterface::class) ?
                 new $className($name, $arguments):
                 new Node($name, $arguments)
         );
